@@ -3,7 +3,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import "./globals.css";
 
 export const metadata = {
-  title: "SmartDiet Hub",
+  title: "Dietara Hub",
   description: "Login and Register",
 };
 
