@@ -2,8 +2,8 @@ import User from "../models/User.js";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import crypto from "crypto";
+import sendEmail from "../utils/sendEmail.js";
 
-// ✅ Allowed roles ( schema enum- match)
 const ALLOWED_ROLES = ["user", "dietician", "kitchen", "admin"];
 
 // ================= REGISTER =================
@@ -13,32 +13,24 @@ export const register = async (req, res) => {
 
     console.log("REGISTER BODY:", req.body);
 
-    // 1️⃣ Validate
     if (!username || !email || !password || !confirmPassword) {
-      console.log("REGISTER VALIDATION FAILED: missing fields");
       return res.status(400).json({ message: "All fields are required" });
     }
 
     if (password !== confirmPassword) {
-      console.log("REGISTER VALIDATION FAILED: passwords do not match");
       return res.status(400).json({ message: "Passwords do not match" });
     }
 
-    // ✅ role validation (invalidனா user)
     const safeRole = ALLOWED_ROLES.includes(role) ? role : "user";
 
-    // 2️⃣ Check existing user
     const existingUser = await User.findOne({ email });
     if (existingUser) {
-      console.log("REGISTER FAILED: user already exists ->", email);
       return res.status(400).json({ message: "User already exists" });
     }
 
-    // 3️⃣ Hash password
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
-    // 4️⃣ Create user
     const newUser = await User.create({
       username,
       email,
@@ -46,16 +38,12 @@ export const register = async (req, res) => {
       role: safeRole,
     });
 
-    console.log("NEW USER SAVED IN DB:", newUser.email, newUser._id.toString());
-
-    // 5️⃣ Generate token
     const token = jwt.sign(
       { id: newUser._id, role: newUser.role },
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
 
-    // 6️⃣ Send response
     return res.status(201).json({
       success: true,
       token,
@@ -80,23 +68,18 @@ export const login = async (req, res) => {
     console.log("LOGIN BODY:", req.body);
 
     if (!email || !password) {
-      console.log("LOGIN VALIDATION FAILED: missing email or password");
       return res.status(400).json({ message: "All fields are required" });
     }
 
     const user = await User.findOne({ email });
-    console.log("FOUND USER:", user ? user.email : "NO USER FOUND");
 
     if (!user) {
-      console.log("LOGIN FAILED: user not found");
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
     const isMatch = await bcrypt.compare(password, user.password);
-    console.log("PASSWORD MATCH:", isMatch);
 
     if (!isMatch) {
-      console.log("LOGIN FAILED: password does not match");
       return res.status(400).json({ message: "Invalid credentials" });
     }
 
@@ -106,15 +89,12 @@ export const login = async (req, res) => {
       { expiresIn: "1d" }
     );
 
-    // ✅ token cookie (optional)
     res.cookie("token", token, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
-      maxAge: 60 * 24 * 60 * 60 * 1000, // 60 days
+      maxAge: 60 * 24 * 60 * 60 * 1000,
     });
-
-    console.log("LOGIN SUCCESS:", user.email);
 
     return res.status(200).json({
       success: true,
@@ -151,27 +131,43 @@ export const forgotPassword = async (req, res) => {
 
     const user = await User.findOne({ email });
 
-    // ✅ Security: user same message
     if (!user) {
-      console.log("FORGOT PASSWORD: user not found");
       return res.status(200).json({
-        message: "If that email is registered, a reset token has been generated",
+        message: "If that email is registered, a reset link has been sent.",
       });
     }
 
     const resetToken = crypto.randomBytes(32).toString("hex");
 
     user.resetPasswordToken = resetToken;
-    user.resetPasswordExpires = Date.now() + 60 * 60 * 1000; // 1 hour
+    user.resetPasswordExpires = Date.now() + 60 * 60 * 1000;
     await user.save();
 
-    console.log("FORGOT PASSWORD TOKEN GENERATED FOR:", email);
+    const resetUrl = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}&email=${encodeURIComponent(
+      email
+    )}`;
 
-    // ✅ DEV/Test: link வேண்டாம், token
+    const html = `
+      <div style="font-family: Arial, sans-serif; line-height: 1.6;">
+        <h2>Reset Your Password</h2>
+        <p>You requested a password reset for your Dietara Hub account.</p>
+        <p>Click the button below to reset your password:</p>
+        <a href="${resetUrl}" style="display:inline-block;padding:12px 20px;background:#a4002c;color:#fff;text-decoration:none;border-radius:8px;">
+          Reset Password
+        </a>
+        <p style="margin-top:16px;">This link will expire in 1 hour.</p>
+        <p>If you did not request this, please ignore this email.</p>
+      </div>
+    `;
+
+    await sendEmail({
+      to: email,
+      subject: "Reset Your Password - Dietara Hub",
+      html,
+    });
+
     return res.status(200).json({
-      message: "Password reset token generated",
-      token: resetToken,
-      email,
+      message: "Password reset link sent to your email.",
     });
   } catch (error) {
     console.log("FORGOT PASSWORD ERROR:", error);
@@ -196,8 +192,6 @@ export const resetPassword = async (req, res) => {
       resetPasswordExpires: { $gt: Date.now() },
     });
 
-    console.log("RESET PASSWORD USER:", user ? user.email : "NO USER FOUND");
-
     if (!user) {
       return res.status(400).json({ message: "Invalid or expired token" });
     }
@@ -209,8 +203,6 @@ export const resetPassword = async (req, res) => {
     user.resetPasswordToken = undefined;
     user.resetPasswordExpires = undefined;
     await user.save();
-
-    console.log("PASSWORD RESET SUCCESS FOR:", email);
 
     return res.status(200).json({ message: "Password reset successful" });
   } catch (error) {
