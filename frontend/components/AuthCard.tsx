@@ -5,11 +5,16 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import { LoginInput, RegisterInput, Role } from "@/types/auth";
+import { FaEye, FaEyeSlash } from "react-icons/fa";
 
 export default function AuthCard() {
   const [isActive, setIsActive] = useState(false);
   const [loading, setLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
+  const [showRegisterPassword, setShowRegisterPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [loginData, setLoginData] = useState<LoginInput>({
     email: "",
@@ -84,6 +89,9 @@ export default function AuthCard() {
 
   return (
     <div className={`container ${isActive ? "active" : ""}`}>
+
+      {/* REGISTER */}
+
       <div className="form-container sign-up">
         <form onSubmit={handleRegisterSubmit}>
           <h1>Registration</h1>
@@ -106,23 +114,49 @@ export default function AuthCard() {
             required
           />
 
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            value={registerData.password}
-            onChange={handleRegisterChange}
-            required
-          />
+          {/* PASSWORD */}
 
-          <input
-            type="password"
-            name="confirmPassword"
-            placeholder="Confirm Password"
-            value={registerData.confirmPassword}
-            onChange={handleRegisterChange}
-            required
-          />
+          <div className="password-input-wrap">
+            <input
+              type={showRegisterPassword ? "text" : "password"}
+              name="password"
+              placeholder="Password"
+              value={registerData.password}
+              onChange={handleRegisterChange}
+              required
+            />
+
+            <span
+              className="password-eye"
+              onClick={() =>
+                setShowRegisterPassword(!showRegisterPassword)
+              }
+            >
+              {showRegisterPassword ? <FaEyeSlash /> : <FaEye />}
+            </span>
+          </div>
+
+          {/* CONFIRM PASSWORD */}
+
+          <div className="password-input-wrap">
+            <input
+              type={showConfirmPassword ? "text" : "password"}
+              name="confirmPassword"
+              placeholder="Confirm Password"
+              value={registerData.confirmPassword}
+              onChange={handleRegisterChange}
+              required
+            />
+
+            <span
+              className="password-eye"
+              onClick={() =>
+                setShowConfirmPassword(!showConfirmPassword)
+              }
+            >
+              {showConfirmPassword ? <FaEyeSlash /> : <FaEye />}
+            </span>
+          </div>
 
           {errorMessage && isActive && (
             <p className="error-text">{errorMessage}</p>
@@ -133,6 +167,8 @@ export default function AuthCard() {
           </button>
         </form>
       </div>
+
+      {/* LOGIN */}
 
       <div className="form-container sign-in">
         <form onSubmit={handleLoginSubmit}>
@@ -147,14 +183,25 @@ export default function AuthCard() {
             required
           />
 
-          <input
-            type="password"
-            name="password"
-            placeholder="Password"
-            value={loginData.password}
-            onChange={handleLoginChange}
-            required
-          />
+          {/* LOGIN PASSWORD */}
+
+          <div className="password-input-wrap">
+            <input
+              type={showLoginPassword ? "text" : "password"}
+              name="password"
+              placeholder="Password"
+              value={loginData.password}
+              onChange={handleLoginChange}
+              required
+            />
+
+            <span
+              className="password-eye"
+              onClick={() => setShowLoginPassword(!showLoginPassword)}
+            >
+              {showLoginPassword ? <FaEyeSlash /> : <FaEye />}
+            </span>
+          </div>
 
           <Link href="/forgot-password">Forgot Password?</Link>
 
@@ -167,6 +214,8 @@ export default function AuthCard() {
           </button>
         </form>
       </div>
+
+      {/* TOGGLE */}
 
       <div className="toggle-container">
         <div className="toggle">

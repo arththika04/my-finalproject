@@ -41,43 +41,59 @@ export default function Navbar() {
         <nav className="navbar-links">
           <Link href="/">Home</Link>
 
-          <div
-            className="nav-dropdown"
-            onMouseEnter={() => setShowServices(true)}
-            onMouseLeave={() => setShowServices(false)}
-          >
-            <button className="nav-dropdown-btn" type="button">
-              Services
-            </button>
-            {showServices && (
-              <div className="dropdown-menu">
-                {services.map((item) => (
-                  <Link key={item.name} href={item.href}>
-                    {item.name}
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
+         <div className="nav-dropdown">
+  <button
+    className="nav-dropdown-btn"
+    type="button"
+    onClick={() => {
+      setShowServices(!showServices);
+      setShowDashboards(false);
+    }}
+  >
+    Services
+  </button>
 
-          <div
-            className="nav-dropdown"
-            onMouseEnter={() => setShowDashboards(true)}
-            onMouseLeave={() => setShowDashboards(false)}
-          >
-            <button className="nav-dropdown-btn" type="button">
-              Dashboards
-            </button>
-            {showDashboards && (
-              <div className="dropdown-menu">
-                {dashboards.map((item) => (
-                  <Link key={item.name} href={item.href}>
-                    {item.name}
-                  </Link>
-                ))}
-              </div>
-            )}
-          </div>
+  {showServices && (
+    <div className="dropdown-menu">
+      {services.map((item) => (
+        <Link
+          key={item.name}
+          href={item.href}
+          onClick={() => setShowServices(false)}
+        >
+          {item.name}
+        </Link>
+      ))}
+    </div>
+  )}
+</div>
+
+          <div className="nav-dropdown">
+  <button
+    className="nav-dropdown-btn"
+    type="button"
+    onClick={() => {
+      setShowDashboards(!showDashboards);
+      setShowServices(false);
+    }}
+  >
+    Dashboards
+  </button>
+
+  {showDashboards && (
+    <div className="dropdown-menu">
+      {dashboards.map((item) => (
+        <Link
+          key={item.name}
+          href={item.href}
+          onClick={() => setShowDashboards(false)}
+        >
+          {item.name}
+        </Link>
+      ))}
+    </div>
+  )}
+</div>
 
           <Link href="/pricing">Pricing</Link>
           <Link href="/about">About</Link>
@@ -88,9 +104,7 @@ export default function Navbar() {
           <Link href="/login" className="login-btn">
             Login
           </Link>
-          <Link href="/register" className="signup-btn">
-            Get Started
-          </Link>
+      
         </div>
 
         <button
