@@ -3,6 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
+import "./Navbar.css";
 
 const services = [
   { name: "AI Diet Assistant", href: "/services#ai" },
