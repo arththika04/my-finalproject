@@ -1,231 +1,137 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import Image from "next/image";
-import Link from "next/link";
-import Script from "next/script";
-
-declare global {
-  interface Window {
-    instgrm?: {
-      Embeds?: {
-        process: () => void;
-      };
-    };
-  }
-}
+import { useEffect } from "react";
 
 export default function HomePage() {
-
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-  const [isPlaying, setIsPlaying] = useState(false);
-
-  const instagramPostLink = "https://www.instagram.com/p/DV5qJ_SiVy6/";
-
-  /* HERO IMAGE SLIDER */
-
-  const heroImages = [
-    "/hero1.jpg",
-    "/hero2.jpg",
-    "/hero3.jpg",
-    "/hero4.jpg",
-    "/hero5.jpg"
-  ];
-
-  const [heroIndex, setHeroIndex] = useState(0);
-
   useEffect(() => {
+    const existingScript = document.querySelector(
+      'script[src="https://www.instagram.com/embed.js"]'
+    );
 
-    const slider = setInterval(() => {
-      setHeroIndex((prev) => (prev + 1) % heroImages.length);
-    }, 3000);
-
-    return () => clearInterval(slider);
-
-  }, []);
-
-  /* INSTAGRAM EMBED */
-
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      if (window.instgrm?.Embeds?.process) {
+    if (!existingScript) {
+      const script = document.createElement("script");
+      script.src = "https://www.instagram.com/embed.js";
+      script.async = true;
+      document.body.appendChild(script);
+    } else {
+      // already script iruntha refresh pannum
+      // @ts-ignore
+      if (window.instgrm) {
+        // @ts-ignore
         window.instgrm.Embeds.process();
       }
-    }, 1200);
+    }
+
+    const timer = setTimeout(() => {
+      // @ts-ignore
+      if (window.instgrm) {
+        // @ts-ignore
+        window.instgrm.Embeds.process();
+      }
+    }, 500);
 
     return () => clearTimeout(timer);
   }, []);
 
-  const handlePlayVideo = () => {
-    if (videoRef.current) {
-      videoRef.current.play();
-      setIsPlaying(true);
-    }
-  };
-
   return (
-    <>
-      <Script
-        src="https://www.instagram.com/embed.js"
-        strategy="afterInteractive"
-        onLoad={() => {
-          if (window.instgrm?.Embeds?.process) {
-            window.instgrm.Embeds.process();
-          }
-        }}
-      />
+    <main className="fitness-home">
+      {/* HERO SECTION */}
+      <section className="hero-section">
+        <div className="hero-overlay">
+          <div className="hero-content">
+            <div className="hero-text">
+              <h1>
+                Transform Your Diet & <br />
+                Health
+              </h1>
 
-      <main className="landing-page">
-
-        {/* HERO SECTION */}
-
-        <section className="hero-banner">
-
-          <div className="hero-text">
-            <h1>Is Your Diet Healthy?</h1>
-            <p>Find out how unhealthy food affects your body</p>
-
-            <Link href="/quiz" className="landing-btn">
-              Take Quiz
-            </Link>
-          </div>
-
-          <div className="hero-image">
-            <Image
-              src={heroImages[heroIndex]}
-              alt="Healthy diet"
-              width={520}
-              height={360}
-              priority
-              className="hero-slider-img"
-            />
-          </div>
-
-        </section>
-
-        {/* CONTENT GRID */}
-
-        <section className="content-grid">
-
-          <div className="left-column">
-
-            {/* VIDEO CARD */}
-
-            <div className="card large-card">
-
-              <h2>⚠ Dangers of Unhealthy Eating</h2>
-
-              <div className="video-card large-video">
-
-                <video
-                  ref={videoRef}
-                  muted
-                  playsInline
-                  controls={isPlaying}
-                  className="custom-video"
-                  onPause={() => setIsPlaying(false)}
-                  onEnded={() => setIsPlaying(false)}
-                >
-                  <source src="/junk-food.mp4" type="video/mp4" />
-                </video>
-
-                {!isPlaying && (
-                  <button
-                    type="button"
-                    className="play-circle"
-                    onClick={handlePlayVideo}
-                    aria-label="Play video"
-                  >
-                    ▶
-                  </button>
-                )}
-
-              </div>
-
-              <p className="card-description">
-                Learn how unhealthy food affects your body and long-term health.
+              <p>
+                Achieve your nutrition goals with customized meal plans,
+                expert dietician advice, and a healthier lifestyle tailored
+                for you.
               </p>
 
-            </div>
-
-            {/* ORDER CARD */}
-
-            <div className="card order-card">
-
-              <div className="order-content">
-
-                <div>
-
-                  <h2>🍽 Order Healthy Meals</h2>
-                  <h3>Dietary Kitchen Prepares</h3>
-                  <p>Healthy meals delivered to your door.</p>
-
-                  <Link href="/order" className="landing-btn small-btn">
-                    Order Now
-                  </Link>
-
-                </div>
-
-                <div className="meal-illustration">
-                  <div className="plate-base"></div>
-                  <div className="food-cover"></div>
-                </div>
-
+              <div className="hero-buttons">
+                <button className="primary-btn">Get Started</button>
+                <button className="secondary-btn">Free Trial</button>
               </div>
 
-            </div>
+              <div className="hero-stats">
+                <div className="stat-box">
+                  <h2>500+</h2>
+                  <p>Active Members</p>
+                </div>
 
-          </div>
+                <div className="stat-box">
+                  <h2>50+</h2>
+                  <p>Expert Dieticians</p>
+                </div>
 
-          {/* RIGHT COLUMN */}
-
-          <div className="right-column">
-
-            <div className="card side-card">
-
-              <h2>Dietary Kitchen Food Videos</h2>
-              <span className="post-label">Instagram Post</span>
-
-              <div className="instagram-embed-wrap">
-
-                <blockquote
-                  className="instagram-media"
-                  data-instgrm-captioned
-                  data-instgrm-permalink={instagramPostLink}
-                  data-instgrm-version="14"
-                  style={{
-                    background: "#fff",
-                    border: 0,
-                    borderRadius: "18px",
-                    margin: 0,
-                    maxWidth: "100%",
-                    minWidth: "100%",
-                    width: "100%",
-                  }}
-                ></blockquote>
-
+                <div className="stat-box">
+                  <h2>100+</h2>
+                  <p>Healthy Plans</p>
+                </div>
               </div>
-
-              <p className="card-description">
-                See the original Instagram post directly on this page.
-              </p>
-
-              <a
-                href={instagramPostLink}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="landing-btn small-btn"
-              >
-                View Post
-              </a>
-
             </div>
+          </div>
+        </div>
+      </section>
 
+      {/* SCROLL CONTENT SECTION */}
+      <section className="landing-sections">
+        <div className="content-grid">
+          {/* LEFT - DANGEROUS EATING VIDEO */}
+          <div className="content-card large-card">
+            <h2>⚠ Dangers of Unhealthy Eating</h2>
+
+           <div className="video-box">
+  <video className="danger-video" controls playsInline>
+    <source src="/junk-food.mp4" type="video/mp4" />
+    Your browser does not support the video tag.
+  </video>
+</div>
+
+            <p>
+              Learn how unhealthy food affects your body and long-term health.
+            </p>
           </div>
 
-        </section>
+          {/* RIGHT - DIETARY KITCHEN */}
+          <div className="content-card side-card">
+            <h2>Dietary Kitchen Food Videos</h2>
+            <p className="orange-text">Instagram Post</p>
 
-      </main>
-    </>
+            <div className="insta-card">
+              <blockquote
+                className="instagram-media"
+                data-instgrm-permalink="https://www.instagram.com/p/DV5qJ_SiVy6/"
+                data-instgrm-version="14"
+                style={{
+                  background: "#FFF",
+                  border: 0,
+                  borderRadius: "16px",
+                  margin: 0,
+                  maxWidth: "100%",
+                  minWidth: "100%",
+                  width: "100%",
+                }}
+              ></blockquote>
+            </div>
+          </div>
+        </div>
+
+        {/* ORDER HEALTHY MEALS */}
+        <div className="content-card order-card">
+          <div className="order-text">
+            <h2>🍽 Order Healthy Meals</h2>
+            <h3>Dietary Kitchen Prepares</h3>
+            <p>Healthy meals delivered to your door.</p>
+            <button className="order-btn">Order Now</button>
+          </div>
+
+          <div className="order-illustration">🍲</div>
+        </div>
+      </section>
+    </main>
   );
 }

@@ -1,20 +1,32 @@
 .site-header {
   width: 100%;
-  padding: 18px 24px 0;
+  padding: 0 24px;
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 1000;
 }
 
 .navbar {
   width: 100%;
   max-width: 100%;
   margin: 0;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 999px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
   padding: 14px 40px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 18px;
+  border-radius: 999px;
+
+  background: rgba(20, 20, 20, 0.18);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+
+  border: 1px solid rgba(255, 255, 255, 0.12);
+
+  box-shadow:
+    0 8px 24px rgba(0, 0, 0, 0.20),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
 }
 
 .navbar-brand {
@@ -22,7 +34,7 @@
   align-items: center;
   gap: 10px;
   text-decoration: none;
-  color: #8b0c2e;
+  color: #ffffff;
   font-size: 20px;
   font-weight: 700;
 }
@@ -41,9 +53,14 @@
 
 .navbar-links a {
   text-decoration: none;
-  color: #334155;
+  color: #ffffff;
   font-size: 15px;
   font-weight: 500;
+  transition: 0.3s ease;
+}
+
+.navbar-links a:hover {
+  color: #e8fff2;
 }
 
 .navbar-actions {
@@ -54,21 +71,35 @@
 
 .login-btn {
   text-decoration: none;
-  color: #8b0c2e;
-  border: 1px solid #d7a6b3;
+  color: #ffffff;
+  border: 1px solid rgba(255, 255, 255, 0.18);
   padding: 10px 20px;
   border-radius: 999px;
   font-weight: 500;
-  background: #fff;
+  background: rgba(20, 20, 20, 0.14);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  transition: 0.3s ease;
+}
+
+.login-btn:hover {
+  background: rgba(255, 255, 255, 0.10);
 }
 
 .signup-btn {
   text-decoration: none;
   color: #fff;
-  background: #8b0c2e;
+  background: rgba(34, 197, 94, 0.82);
   padding: 10px 20px;
   border-radius: 999px;
   font-weight: 600;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  box-shadow: 0 8px 18px rgba(34, 197, 94, 0.2);
+  transition: 0.3s ease;
+}
+
+.signup-btn:hover {
+  background: rgba(22, 163, 74, 0.92);
 }
 
 .mobile-menu-btn {
@@ -77,6 +108,7 @@
   background: transparent;
   font-size: 24px;
   cursor: pointer;
+  color: white;
 }
 
 .mobile-menu {
@@ -100,15 +132,22 @@
     width: 100%;
     max-width: 1100px;
     margin: 12px auto 0;
-    background: #fff;
-    border-radius: 24px;
     padding: 20px;
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+    border-radius: 24px;
+
+    background: rgba(20, 20, 20, 0.20);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
+
+    border: 1px solid rgba(255, 255, 255, 0.12);
+    box-shadow:
+      0 8px 24px rgba(0, 0, 0, 0.20),
+      inset 0 1px 0 rgba(255, 255, 255, 0.08);
   }
 
   .mobile-menu a {
     text-decoration: none;
-    color: #334155;
+    color: #ffffff;
     font-weight: 500;
   }
 }
