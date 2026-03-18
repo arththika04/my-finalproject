@@ -2,8 +2,8 @@
 
 import Link from "next/link";
 import { useEffect } from "react";
-import BMICalculator from "@/components/BMICalculator";
 import ServicesInteractive from "@/components/ServicesInteractive";
+import BMICalculator from "@/components/BMICalculator";
 
 export default function HomePage() {
 
@@ -18,28 +18,11 @@ export default function HomePage() {
       script.src = "https://www.instagram.com/embed.js";
       script.async = true;
       document.body.appendChild(script);
-    } else {
-      // @ts-ignore
-      if (window.instgrm) {
-        // @ts-ignore
-        window.instgrm.Embeds.process();
-      }
     }
-
-    const timer = setTimeout(() => {
-      // @ts-ignore
-      if (window.instgrm) {
-        // @ts-ignore
-        window.instgrm.Embeds.process();
-      }
-    }, 500);
-
-    return () => clearTimeout(timer);
 
   }, []);
 
   return (
-
     <main className="fitness-home">
 
       {/* HERO SECTION */}
@@ -52,9 +35,7 @@ export default function HomePage() {
 
             <div className="hero-text">
 
-              <h1>
-                Transform Your Diet & Health
-              </h1>
+              <h1>Transform Your Diet & Health</h1>
 
               <p>
                 Achieve your nutrition goals with customized meal plans,
@@ -63,11 +44,9 @@ export default function HomePage() {
               </p>
 
               <div className="hero-buttons">
-
                 <Link href="/register" className="primary-btn">
                   Get Started
                 </Link>
-
               </div>
 
               <div className="hero-stats">
@@ -97,19 +76,18 @@ export default function HomePage() {
 
       </section>
 
+
       {/* WHY CHOOSE US */}
 
       <section className="why-section">
 
         <div className="why-title">
-
           <h2>Why Choose Us</h2>
 
           <p>
             Dietara helps you build healthier eating habits with expert
             guidance, smart tracking, and quality meal support.
           </p>
-
         </div>
 
         <div className="why-container">
@@ -120,8 +98,7 @@ export default function HomePage() {
               <div className="why-icon">🥗</div>
               <h3>Customized Plans</h3>
               <p>
-                Customized meal plans based on your health goals and daily
-                routine.
+                Customized meal plans based on your health goals.
               </p>
             </div>
 
@@ -129,19 +106,16 @@ export default function HomePage() {
               <div className="why-icon">👩‍⚕️</div>
               <h3>Expert Dieticians</h3>
               <p>
-                Get trusted advice and guidance from certified nutrition
-                professionals.
+                Get trusted advice from certified nutrition professionals.
               </p>
             </div>
 
           </div>
 
           <div className="why-center">
-
             <div className="why-logo">
-              <img src="/logo.png" alt="Dietara Logo" />
+              <img src="/logo.png" alt="Dietara Logo"/>
             </div>
-
           </div>
 
           <div className="why-right">
@@ -150,7 +124,7 @@ export default function HomePage() {
               <div className="why-icon">📊</div>
               <h3>Smart Tracking</h3>
               <p>
-                Monitor your meals, habits, and progress with an easy system.
+                Track your meals and progress easily.
               </p>
             </div>
 
@@ -158,8 +132,7 @@ export default function HomePage() {
               <div className="why-icon">🍲</div>
               <h3>Healthy Kitchen</h3>
               <p>
-                Enjoy balanced meals prepared with care for a healthier
-                lifestyle.
+                Enjoy balanced meals prepared with care.
               </p>
             </div>
 
@@ -169,15 +142,18 @@ export default function HomePage() {
 
       </section>
 
-      {/* SERVICES INTERACTIVE SECTION */}
+
+      {/* SERVICES SECTION */}
 
       <ServicesInteractive />
+
 
       {/* BMI CALCULATOR */}
 
       <BMICalculator />
 
-      {/* CONTENT SECTIONS */}
+
+      {/* CONTENT SECTION */}
 
       <section className="landing-sections">
 
@@ -189,11 +165,9 @@ export default function HomePage() {
 
             <div className="video-box">
 
-              <video className="danger-video" controls playsInline>
+              <video controls className="danger-video">
 
-                <source src="/junk-food.mp4" type="video/mp4" />
-
-                Your browser does not support the video tag.
+                <source src="/junk-food.mp4" type="video/mp4"/>
 
               </video>
 
@@ -204,6 +178,7 @@ export default function HomePage() {
             </p>
 
           </div>
+
 
           <div className="content-card side-card">
 
@@ -218,21 +193,20 @@ export default function HomePage() {
                 data-instgrm-permalink="https://www.instagram.com/p/DV5qJ_SiVy6/"
                 data-instgrm-version="14"
                 style={{
-                  background: "#FFF",
-                  border: 0,
-                  borderRadius: "16px",
-                  margin: 0,
-                  maxWidth: "100%",
-                  minWidth: "100%",
-                  width: "100%",
+                  background:"#FFF",
+                  border:0,
+                  borderRadius:"16px",
+                  margin:0,
+                  width:"100%"
                 }}
-              ></blockquote>
+              />
 
             </div>
 
           </div>
 
         </div>
+
 
         {/* ORDER SECTION */}
 
@@ -246,9 +220,11 @@ export default function HomePage() {
 
             <p>Healthy meals delivered to your door.</p>
 
-            <button className="order-btn">
-              Order Now
-            </button>
+            <Link href="/kitchen">
+              <button className="order-btn">
+                Order Now
+              </button>
+            </Link>
 
           </div>
 
