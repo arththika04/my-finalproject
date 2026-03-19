@@ -7,6 +7,7 @@ import { useAuth } from "@/context/AuthContext";
 import { LoginInput, RegisterInput, Role } from "@/types/auth";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 
+
 export default function AuthCard() {
 
   const [isActive, setIsActive] = useState(false);

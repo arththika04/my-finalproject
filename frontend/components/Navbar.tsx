@@ -19,7 +19,11 @@ const dashboards = [
   { name: "Admin Dashboard", href: "/dashboard#admin" },
 ];
 
-export default function Navbar() {
+type NavbarProps = {
+  onLoginClick: () => void;
+};
+
+export default function Navbar({ onLoginClick }: NavbarProps) {
   const [showServices, setShowServices] = useState(false);
   const [showDashboards, setShowDashboards] = useState(false);
 
@@ -100,9 +104,9 @@ export default function Navbar() {
         </nav>
 
         <div className="navbar-actions">
-          <Link href="/login" className="login-btn">
+          <button type="button" className="login-btn" onClick={onLoginClick}>
             Login
-          </Link>
+          </button>
         </div>
       </div>
     </header>
