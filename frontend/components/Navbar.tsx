@@ -9,8 +9,8 @@ const services = [
   { name: "AI Diet Assistant", href: "/ai-assistant" },
   { name: "Dietician Consultation", href: "/services#dietician" },
   { name: "Dietary Kitchen", href: "/services#kitchen" },
-  { name: "Meal Tracking", href: "/services#tracking" },
-  { name: "Reminders", href: "/services#reminders" },
+  { name: "Meal Tracking", href: "/meal-tracking" },
+  { name: "Reminders", href: "/reminder" },
 ];
 
 const dashboards = [
@@ -29,7 +29,6 @@ export default function Navbar() {
   return (
     <header className="site-header">
       <div className="navbar">
-        {/* LOGO */}
         <Link href="/" className="navbar-brand">
           <Image
             src="/logo.png"
@@ -41,11 +40,9 @@ export default function Navbar() {
           <span>Dietara</span>
         </Link>
 
-        {/* NAV LINKS */}
         <nav className="navbar-links">
           <Link href="/">Home</Link>
 
-          {/* SERVICES */}
           <div className="nav-dropdown">
             <button
               type="button"
@@ -73,7 +70,6 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* DASHBOARDS */}
           <div className="nav-dropdown">
             <button
               type="button"
@@ -106,7 +102,6 @@ export default function Navbar() {
           <Link href="/contact">Contact</Link>
         </nav>
 
-        {/* LOGIN / LOGOUT BUTTON */}
         <div className="navbar-actions">
           {user ? (
             <button

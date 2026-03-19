@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect } from "react";
 import ServicesInteractive from "@/components/ServicesInteractive";
 import BMICalculator from "@/components/BMICalculator";
@@ -19,23 +20,7 @@ export default function HomePage() {
       script.src = "https://www.instagram.com/embed.js";
       script.async = true;
       document.body.appendChild(script);
-    } else {
-      // @ts-ignore
-      if (window.instgrm) {
-        // @ts-ignore
-        window.instgrm.Embeds.process();
-      }
     }
-
-    const timer = setTimeout(() => {
-      // @ts-ignore
-      if (window.instgrm) {
-        // @ts-ignore
-        window.instgrm.Embeds.process();
-      }
-    }, 500);
-
-    return () => clearTimeout(timer);
   }, []);
 
   return (
@@ -43,7 +28,7 @@ export default function HomePage() {
       <AuthModal isOpen={isLoginOpen} onClose={closeLogin} />
 
       <main className="fitness-home">
-        {/* HERO */}
+        {/* HERO SECTION */}
         <section className="hero-section">
           <div className="hero-overlay">
             <div className="hero-content">
@@ -87,22 +72,71 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* SERVICES */}
+        {/* WHY CHOOSE US */}
+        <section className="why-section">
+          <div className="why-title">
+            <h2>Why Choose Us</h2>
+
+            <p>
+              Dietara helps you build healthier eating habits with expert
+              guidance, smart tracking, and quality meal support.
+            </p>
+          </div>
+
+          <div className="why-container">
+            <div className="why-left">
+              <div className="why-card">
+                <div className="why-icon">🥗</div>
+                <h3>Customized Plans</h3>
+                <p>Customized meal plans based on your health goals.</p>
+              </div>
+
+              <div className="why-card">
+                <div className="why-icon">👩‍⚕️</div>
+                <h3>Expert Dieticians</h3>
+                <p>
+                  Get trusted advice from certified nutrition professionals.
+                </p>
+              </div>
+            </div>
+
+            <div className="why-center">
+              <div className="why-logo">
+                <img src="/logo.png" alt="Dietara Logo" />
+              </div>
+            </div>
+
+            <div className="why-right">
+              <div className="why-card">
+                <div className="why-icon">📊</div>
+                <h3>Smart Tracking</h3>
+                <p>Track your meals and progress easily.</p>
+              </div>
+
+              <div className="why-card">
+                <div className="why-icon">🍲</div>
+                <h3>Healthy Kitchen</h3>
+                <p>Enjoy balanced meals prepared with care.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        {/* SERVICES SECTION */}
         <ServicesInteractive />
 
-        {/* BMI */}
+        {/* BMI CALCULATOR */}
         <BMICalculator />
 
-        {/* DANGERS + INSTAGRAM */}
+        {/* CONTENT SECTION */}
         <section className="landing-sections">
           <div className="content-grid">
             <div className="content-card large-card">
               <h2>⚠ Dangers of Unhealthy Eating</h2>
 
               <div className="video-box">
-                <video className="danger-video" controls playsInline>
+                <video controls className="danger-video">
                   <source src="/junk-food.mp4" type="video/mp4" />
-                  Your browser does not support the video tag.
                 </video>
               </div>
 
@@ -113,6 +147,7 @@ export default function HomePage() {
 
             <div className="content-card side-card">
               <h2>Dietary Kitchen Food Videos</h2>
+
               <p className="orange-text">Instagram Post</p>
 
               <div className="insta-card">
@@ -125,22 +160,25 @@ export default function HomePage() {
                     border: 0,
                     borderRadius: "16px",
                     margin: 0,
-                    maxWidth: "100%",
-                    minWidth: "100%",
                     width: "100%",
                   }}
-                ></blockquote>
+                />
               </div>
             </div>
           </div>
 
-          {/* ORDER HEALTHY MEALS */}
+          {/* ORDER SECTION */}
           <div className="content-card order-card">
             <div className="order-text">
               <h2>🍽 Order Healthy Meals</h2>
+
               <h3>Dietary Kitchen Prepares</h3>
+
               <p>Healthy meals delivered to your door.</p>
-              <button className="order-btn">Order Now</button>
+
+              <Link href="/kitchen">
+                <button className="order-btn">Order Now</button>
+              </Link>
             </div>
 
             <div className="order-illustration">🍲</div>

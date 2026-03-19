@@ -6,7 +6,13 @@
 
 body {
   background: #f7f4f6;
+  font-family: var(--font-body);
 }
+
+/* headings */
+h1, h2, h3, h4, h5 {
+  font-family: var(--font-heading);}
+
 
 .auth-page {
   min-height: 100vh;
@@ -435,7 +441,7 @@ body {
   background: rgba(255, 255, 255, 0.9);
   border-radius: 999px;
   box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
-  padding: 14px 40px;
+  padding: 10px 26px;
   display: flex;
   align-items: center;
   justify-content: space-between;

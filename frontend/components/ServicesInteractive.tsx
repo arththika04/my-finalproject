@@ -3,16 +3,48 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
+type ServiceItem = {
+  title: string;
+  desc: string;
+  image: string;
+  link: string;
+};
+
 export default function ServicesInteractive() {
   const router = useRouter();
-  const [active, setActive] = useState(1);
+  const [active, setActive] = useState(0);
 
-  const services = [
-    { title: "AI Diet Assistant", desc: "Generate personalized diet plans using AI.", image: "/ai.jpg", link: "/ai-assistant" },
-    { title: "Dietician Consultation", desc: "Connect with certified nutrition experts.", image: "/dietician.jpg", link: "/dietician" },
-    { title: "Dietary Kitchen", desc: "Order healthy meals.", image: "/kitchen.jpg", link: "/kitchen" },
-    { title: "Meal Tracking & Analytics", desc: "Track nutrition progress.", image: "/track.jpg", link: "/tracking" },
-    { title: "Smart Reminders", desc: "Get reminders.", image: "/reminder.jpg", link: "/reminders" },
+  const services: ServiceItem[] = [
+    {
+      title: "AI Diet Assistant",
+      desc: "Generate personalized diet plans using AI.",
+      image: "/ai.jpg",
+      link: "/ai-assistant",
+    },
+    {
+      title: "Dietician Consultation",
+      desc: "Connect with certified nutrition experts.",
+      image: "/dietician.jpg",
+      link: "/dietician",
+    },
+    {
+      title: "Dietary Kitchen",
+      desc: "Order healthy meals.",
+      image: "/kitchen.jpg",
+      link: "/kitchen",
+    },
+    {
+      title: "Meal Tracking & Analytics",
+      desc: "Track nutrition progress.",
+      image: "/track.jpg",
+      link: "/meal-tracking",
+    },
+    {
+      title: "Smart Reminders",
+      desc: "Get reminders.",
+      image: "/reminder.jpg",
+      link: "/reminder",
+    },
   ];
 
   const handleProtectedOpen = (path: string) => {
@@ -35,7 +67,7 @@ export default function ServicesInteractive() {
         <div className="services-list">
           {services.map((service, index) => (
             <div
-              key={index}
+              key={service.title}
               className={`service-item ${active === index ? "active" : ""}`}
               onMouseEnter={() => setActive(index)}
             >
@@ -46,6 +78,7 @@ export default function ServicesInteractive() {
                 </div>
 
                 <button
+                  type="button"
                   className="service-open-btn"
                   onClick={() => handleProtectedOpen(service.link)}
                 >
@@ -57,7 +90,11 @@ export default function ServicesInteractive() {
         </div>
 
         <div className="services-image">
-          <img src={services[active].image} />
+          <img
+            src={services[active].image}
+            alt={services[active].title}
+            className="services-preview-image"
+          />
         </div>
       </div>
     </section>
