@@ -1,6 +1,12 @@
 "use client";
 
-import { createContext, useContext, useState, ReactNode, useEffect } from "react";
+import {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useEffect,
+} from "react";
 import api from "@/lib/axios";
 import {
   AuthResponse,
@@ -31,8 +37,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const savedUser = localStorage.getItem("user");
+
     if (savedUser) {
-      setUser(JSON.parse(savedUser));
+      try {
+        setUser(JSON.parse(savedUser));
+      } catch (error) {
+        localStorage.removeItem("user");
+      }
     }
   }, []);
 
@@ -41,20 +52,28 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const login = async (data: LoginInput): Promise<User> => {
     const response = await api.post<AuthResponse>("/auth/login", data);
-    setUser(response.data.user);
+
+    const loggedInUser = response.data.user;
+
+    setUser(loggedInUser);
     localStorage.setItem("token", response.data.token);
-    localStorage.setItem("user", JSON.stringify(response.data.user));
+    localStorage.setItem("user", JSON.stringify(loggedInUser));
+
     closeLogin();
-    return response.data.user;
+    return loggedInUser;
   };
 
   const register = async (data: RegisterInput): Promise<User> => {
     const response = await api.post<AuthResponse>("/auth/register", data);
-    setUser(response.data.user);
+
+    const registeredUser = response.data.user;
+
+    setUser(registeredUser);
     localStorage.setItem("token", response.data.token);
-    localStorage.setItem("user", JSON.stringify(response.data.user));
+    localStorage.setItem("user", JSON.stringify(registeredUser));
+
     closeLogin();
-    return response.data.user;
+    return registeredUser;
   };
 
   const forgotPassword = async (
@@ -73,8 +92,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const logout = () => {
     setUser(null);
+    setIsLoginOpen(false);
+
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+
+    window.location.href = "/";
   };
 
   return (

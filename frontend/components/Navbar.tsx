@@ -1,6 +1,6 @@
 "use client";
 
-import Image from "next/image"; // ✅ IMPORTANT
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { useAuth } from "@/context/AuthContext";
@@ -14,17 +14,17 @@ const services = [
 ];
 
 const dashboards = [
-  { name: "User Dashboard", href: "/dashboard#user" },
-  { name: "Dietician Dashboard", href: "/dashboard#dietician" },
-  { name: "Kitchen Dashboard", href: "/dashboard#kitchen" },
-  { name: "Admin Dashboard", href: "/dashboard#admin" },
+  { name: "User Dashboard", href: "/dashboard" },
+  { name: "Dietician Dashboard", href: "/dashboard" },
+  { name: "Kitchen Dashboard", href: "/dashboard" },
+  { name: "Admin Dashboard", href: "/dashboard" },
 ];
 
 export default function Navbar() {
   const [showServices, setShowServices] = useState(false);
   const [showDashboards, setShowDashboards] = useState(false);
 
-  const { openLogin } = useAuth();
+  const { user, openLogin, logout } = useAuth();
 
   return (
     <header className="site-header">
@@ -106,15 +106,25 @@ export default function Navbar() {
           <Link href="/contact">Contact</Link>
         </nav>
 
-        {/* LOGIN BUTTON */}
+        {/* LOGIN / LOGOUT BUTTON */}
         <div className="navbar-actions">
-          <button
-            type="button"
-            className="login-btn"
-            onClick={openLogin}
-          >
-            Login
-          </button>
+          {user ? (
+            <button
+              type="button"
+              className="login-btn"
+              onClick={logout}
+            >
+              Logout
+            </button>
+          ) : (
+            <button
+              type="button"
+              className="login-btn"
+              onClick={openLogin}
+            >
+              Login
+            </button>
+          )}
         </div>
       </div>
     </header>
