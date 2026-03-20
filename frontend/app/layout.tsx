@@ -1,6 +1,7 @@
 import { ReactNode } from "react";
 import { AuthProvider } from "@/context/AuthContext";
 import Navbar from "@/components/Navbar";
+import Footer from "@/components/Footer"; // ✅ ADD THIS
 import "./globals.css";
 
 import { Poppins, Sora } from "next/font/google";
@@ -37,8 +38,14 @@ export default function RootLayout({
       <body className={`${poppins.variable} ${sora.variable}`}>
         <AuthProvider>
           <Navbar />
+
+          {/* ===== PAGE CONTENT ===== */}
           {children}
 
+          {/* ===== FOOTER ===== */}
+          <Footer />
+
+          {/* ===== TOAST ===== */}
           <ToastContainer
             position="top-right"
             autoClose={2000}

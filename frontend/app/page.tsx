@@ -72,118 +72,85 @@ export default function HomePage() {
           </div>
         </section>
 
-        {/* WHY CHOOSE US */}
-        <section className="why-section">
-          <div className="why-title">
-            <h2>Why Choose Us</h2>
 
-            <p>
-              Dietara helps you build healthier eating habits with expert
-              guidance, smart tracking, and quality meal support.
-            </p>
-          </div>
-
-          <div className="why-container">
-            <div className="why-left">
-              <div className="why-card">
-                <div className="why-icon">🥗</div>
-                <h3>Customized Plans</h3>
-                <p>Customized meal plans based on your health goals.</p>
-              </div>
-
-              <div className="why-card">
-                <div className="why-icon">👩‍⚕️</div>
-                <h3>Expert Dieticians</h3>
-                <p>
-                  Get trusted advice from certified nutrition professionals.
-                </p>
-              </div>
-            </div>
-
-            <div className="why-center">
-              <div className="why-logo">
-                <img src="/logo.png" alt="Dietara Logo" />
-              </div>
-            </div>
-
-            <div className="why-right">
-              <div className="why-card">
-                <div className="why-icon">📊</div>
-                <h3>Smart Tracking</h3>
-                <p>Track your meals and progress easily.</p>
-              </div>
-
-              <div className="why-card">
-                <div className="why-icon">🍲</div>
-                <h3>Healthy Kitchen</h3>
-                <p>Enjoy balanced meals prepared with care.</p>
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* SERVICES SECTION */}
+         {/* SERVICES SECTION */}
         <ServicesInteractive />
 
-        {/* BMI CALCULATOR */}
+
+         {/* BMI CALCULATOR */}
         <BMICalculator />
 
-        {/* CONTENT SECTION */}
-        <section className="landing-sections">
-          <div className="content-grid">
-            <div className="content-card large-card">
-              <h2>⚠ Dangers of Unhealthy Eating</h2>
+        {/* why choose us */}
 
-              <div className="video-box">
-                <video controls className="danger-video">
-                  <source src="/junk-food.mp4" type="video/mp4" />
-                </video>
-              </div>
+        <section className="why-section-premium">
+  <div className="why-title">
+    <h2>Why Choose Us</h2>
+    <p>
+      Dietara helps you build healthier eating habits with expert guidance,
+      smart tracking, and quality meal support.
+    </p>
+  </div>
 
-              <p>
-                Learn how unhealthy food affects your body and long-term health.
-              </p>
-            </div>
+  <div className="why-container">
+    
+    {/* LEFT */}
+    <div className="why-left">
+      <div className="why-card-premium">
+        <div className="why-icon">🥗</div>
+        <h3>Customized Plans</h3>
+        <p>Customized meal plans based on your health goals.</p>
+      </div>
 
-            <div className="content-card side-card">
-              <h2>Dietary Kitchen Food Videos</h2>
+      <div className="why-card-premium">
+        <div className="why-icon">👩‍⚕️</div>
+        <h3>Expert Dieticians</h3>
+        <p>Get trusted advice from certified nutrition professionals.</p>
+      </div>
+    </div>
 
-              <p className="orange-text">Instagram Post</p>
+    {/* CENTER */}
+    <div className="why-center">
+      <div className="why-logo-premium">
+        <img src="/logo.png" alt="Dietara Logo" />
+      </div>
+    </div>
 
-              <div className="insta-card">
-                <blockquote
-                  className="instagram-media"
-                  data-instgrm-permalink="https://www.instagram.com/p/DV5qJ_SiVy6/"
-                  data-instgrm-version="14"
-                  style={{
-                    background: "#FFF",
-                    border: 0,
-                    borderRadius: "16px",
-                    margin: 0,
-                    width: "100%",
-                  }}
-                />
-              </div>
-            </div>
-          </div>
+    {/* RIGHT */}
+    <div className="why-right">
+      <div className="why-card-premium">
+        <div className="why-icon">📊</div>
+        <h3>Smart Tracking</h3>
+        <p>Track your meals and progress easily.</p>
+      </div>
 
-          {/* ORDER SECTION */}
-          <div className="content-card order-card">
-            <div className="order-text">
-              <h2>🍽 Order Healthy Meals</h2>
+      <div className="why-card-premium">
+        <div className="why-icon">🍲</div>
+        <h3>Healthy Kitchen</h3>
+        <p>Enjoy balanced meals prepared with care.</p>
+      </div>
+    </div>
 
-              <h3>Dietary Kitchen Prepares</h3>
+  </div>
+</section>
 
-              <p>Healthy meals delivered to your door.</p>
 
-              <Link href="/kitchen">
-                <button className="order-btn">Order Now</button>
-              </Link>
-            </div>
+<section className="allergy-section">
+  <div className="allergy-box">
+    <h3>⚠️ Allergy & Health Notice</h3>
 
-            <div className="order-illustration">🍲</div>
-          </div>
-        </section>
+    <p>
+      If you are aware of any food allergies, please inform us clearly before using our services.
+    </p>
+
+    <p>
+      If you are unsure, we recommend submitting an allergy report or consulting a medical professional.
+    </p>
+
+    <p>
+      SmartDiet Hub is not responsible for any allergic reactions caused due to missing or incorrect information.
+    </p>
+  </div>
+</section>
       </main>
     </>
   );

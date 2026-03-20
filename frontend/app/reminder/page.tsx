@@ -1,7 +1,7 @@
 "use client";
 
 import "./reminder.css";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 
 type MealStatus = "done" | "upcoming" | "missed";
 
@@ -12,12 +12,14 @@ type MealItem = {
 };
 
 export default function ReminderPage() {
-  const [waterIntake, setWaterIntake] = useState(1.5);
+  const [waterIntake, setWaterIntake] = useState(0);
   const [waterGoal] = useState(3);
   const [currentTime, setCurrentTime] = useState("");
 
   const [weightGoal] = useState(60);
   const [currentWeight, setCurrentWeight] = useState(64.2);
+
+  const [waterInterval, setWaterInterval] = useState(20);
 
   const [meals, setMeals] = useState<MealItem[]>([
     { name: "Breakfast", time: "08:00", status: "done" },
@@ -25,8 +27,13 @@ export default function ReminderPage() {
     { name: "Dinner", time: "19:30", status: "upcoming" },
   ]);
 
+  const [showAlert, setShowAlert] = useState(false);
+  const [alertMessage, setAlertMessage] = useState("");
+
   const [lastWaterReminder, setLastWaterReminder] = useState<number | null>(null);
   const [notifiedMeals, setNotifiedMeals] = useState<string[]>([]);
+
+  const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const waterPercent = useMemo(() => {
     return Math.min((waterIntake / waterGoal) * 100, 100);
@@ -54,6 +61,26 @@ export default function ReminderPage() {
     if ("Notification" in window && Notification.permission === "granted") {
       new Notification(title, { body });
     }
+  };
+
+  const playSound = async () => {
+    try {
+      if (!audioRef.current) return;
+      audioRef.current.currentTime = 0;
+      await audioRef.current.play();
+    } catch (error) {
+      console.log("Audio play blocked until user interacts once.", error);
+    }
+  };
+
+  const triggerAlert = async (message: string) => {
+    setAlertMessage(message);
+    setShowAlert(true);
+    await playSound();
+
+    setTimeout(() => {
+      setShowAlert(false);
+    }, 5000);
   };
 
   const handleDrinkWater = () => {
@@ -84,11 +111,21 @@ export default function ReminderPage() {
     setCurrentWeight((prev) => Number((prev - 0.2).toFixed(1)));
   };
 
+  const handleMealTimeChange = (mealName: string, newTime: string) => {
+    setMeals((prev) =>
+      prev.map((meal) =>
+        meal.name === mealName ? { ...meal, time: newTime } : meal
+      )
+    );
+  };
+
   useEffect(() => {
     requestNotificationPermission();
 
     const savedWaterReminder = localStorage.getItem("lastWaterReminder");
     const savedMealNotifications = localStorage.getItem("notifiedMeals");
+    const savedMeals = localStorage.getItem("reminderMeals");
+    const savedWaterInterval = localStorage.getItem("waterInterval");
 
     if (savedWaterReminder) {
       setLastWaterReminder(Number(savedWaterReminder));
@@ -96,6 +133,14 @@ export default function ReminderPage() {
 
     if (savedMealNotifications) {
       setNotifiedMeals(JSON.parse(savedMealNotifications));
+    }
+
+    if (savedMeals) {
+      setMeals(JSON.parse(savedMeals));
+    }
+
+    if (savedWaterInterval) {
+      setWaterInterval(Number(savedWaterInterval));
     }
   }, []);
 
@@ -110,7 +155,15 @@ export default function ReminderPage() {
   }, [notifiedMeals]);
 
   useEffect(() => {
-    const updateNow = () => {
+    localStorage.setItem("reminderMeals", JSON.stringify(meals));
+  }, [meals]);
+
+  useEffect(() => {
+    localStorage.setItem("waterInterval", String(waterInterval));
+  }, [waterInterval]);
+
+  useEffect(() => {
+    const checkNow = async () => {
       const now = new Date();
       const hours = now.getHours().toString().padStart(2, "0");
       const minutes = now.getMinutes().toString().padStart(2, "0");
@@ -119,17 +172,18 @@ export default function ReminderPage() {
       setCurrentTime(formattedTime);
 
       const nowTimestamp = Date.now();
-      const twentyMinutes = 20 * 60 * 1000;
+      const intervalMs = waterInterval * 60 * 1000;
 
       if (
         lastWaterReminder === null ||
-        nowTimestamp - lastWaterReminder >= twentyMinutes
+        nowTimestamp - lastWaterReminder >= intervalMs
       ) {
         showBrowserNotification("Water Reminder 💧", "Time to drink some water.");
+        await triggerAlert("💧 Time to drink water!");
         setLastWaterReminder(nowTimestamp);
       }
 
-      meals.forEach((meal) => {
+      for (const meal of meals) {
         if (
           meal.time === formattedTime &&
           meal.status === "upcoming" &&
@@ -139,19 +193,22 @@ export default function ReminderPage() {
             `${meal.name} Reminder 🍽️`,
             `It's time for ${meal.name}.`
           );
+          await triggerAlert(`🍽️ It's time for ${meal.name}!`);
           setNotifiedMeals((prev) => [...prev, meal.name]);
         }
-      });
+      }
     };
 
-    updateNow();
-    const interval = setInterval(updateNow, 60000);
+    checkNow();
+    const interval = setInterval(checkNow, 60000);
 
     return () => clearInterval(interval);
-  }, [lastWaterReminder, meals, notifiedMeals]);
+  }, [lastWaterReminder, meals, notifiedMeals, waterInterval]);
 
   return (
     <main className="reminder-page">
+      <audio ref={audioRef} src="/sounds/alert.mp3" preload="auto" />
+
       <div className="reminder-bg-glow reminder-bg-glow-1" />
       <div className="reminder-bg-glow reminder-bg-glow-2" />
 
@@ -166,9 +223,7 @@ export default function ReminderPage() {
               Water intake, meal timing and weight loss reminders in a premium
               futuristic UI.
             </p>
-            <div className="live-time-box">
-              Current Time: {currentTime || "--:--"}
-            </div>
+            <div className="live-time-box">Current Time: {currentTime || "--:--"}</div>
           </div>
 
           <div className="hero-orb-wrap">
@@ -181,7 +236,7 @@ export default function ReminderPage() {
 
         <section className="top-status-grid">
           <div className="mini-card">
-            <span className="mini-label">Today’s Focus</span>
+            <span className="mini-label">Today&apos;s Focus</span>
             <strong>Consistency</strong>
           </div>
 
@@ -223,8 +278,22 @@ export default function ReminderPage() {
               />
             </div>
 
+            <div className="water-setting-row">
+              <label htmlFor="waterInterval">Reminder Interval</label>
+              <select
+                id="waterInterval"
+                value={waterInterval}
+                onChange={(e) => setWaterInterval(Number(e.target.value))}
+                className="reminder-select"
+              >
+                <option value={20}>20 mins</option>
+                <option value={30}>30 mins</option>
+                <option value={60}>1 hour</option>
+              </select>
+            </div>
+
             <div className="sub-info-row">
-              <span>Auto reminder every 20 mins</span>
+              <span>Auto reminder every {waterInterval} mins</span>
               <span>Small steps matter</span>
             </div>
 
@@ -262,22 +331,18 @@ export default function ReminderPage() {
                     />
                     <div>
                       <h4>{meal.name}</h4>
-                      <p>{meal.time}</p>
+
+                      <input
+                        type="time"
+                        value={meal.time}
+                        onChange={(e) => handleMealTimeChange(meal.name, e.target.value)}
+                        className="time-input"
+                      />
                     </div>
                   </div>
 
                   <div className="meal-right">
-                    <span
-                      className={`meal-status-pill ${
-                        meal.status === "done"
-                          ? "pill-done"
-                          : meal.status === "missed"
-                          ? "pill-missed"
-                          : "pill-upcoming"
-                      }`}
-                    >
-                      {meal.status}
-                    </span>
+                    <span className="meal-status-pill">{meal.status}</span>
 
                     {meal.status !== "done" && (
                       <button
@@ -290,7 +355,7 @@ export default function ReminderPage() {
 
                     {meal.status === "upcoming" && (
                       <button
-                        className="tiny-action-btn tiny-danger"
+                        className="tiny-action-btn"
                         onClick={() => markMealMissed(meal.name)}
                       >
                         Miss
@@ -342,6 +407,15 @@ export default function ReminderPage() {
           ✦
         </div>
       </section>
+
+      {showAlert && (
+        <div className="alert-overlay">
+          <div className="alert-popup">
+            <h2>{alertMessage}</h2>
+            <button onClick={() => setShowAlert(false)}>Close</button>
+          </div>
+        </div>
+      )}
     </main>
   );
 }

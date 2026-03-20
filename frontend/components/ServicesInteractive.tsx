@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "react-toastify"; // ✅ ADD THIS
 
 type ServiceItem = {
   title: string;
@@ -51,9 +52,13 @@ export default function ServicesInteractive() {
     const token = localStorage.getItem("token");
 
     if (!token) {
-      alert("⚠ Please login first!");
-      router.push(`/login?next=${encodeURIComponent(path)}`);
-      return;
+      // ❌ alert REMOVE
+      // alert("⚠ Please login first!");
+
+      // ✅ TOAST ADD
+      toast.error("Please login first!");
+
+      return; // 🔥 IMPORTANT (navigation stop)
     }
 
     router.push(path);
