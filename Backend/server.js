@@ -20,6 +20,9 @@ import newsletterRoutes from "./routes/newsletterRoutes.js";
 
 
 
+
+
+
 const app = express();
 
 // connect database
@@ -59,6 +62,7 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/kitchen", kitchenRequestRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api/newsletter", newsletterRoutes);
+
 
 // server
 const PORT = process.env.PORT || 5000;

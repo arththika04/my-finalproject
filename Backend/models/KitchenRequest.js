@@ -23,7 +23,7 @@ const kitchenRequestSchema = new mongoose.Schema(
       required: true,
     },
 
-    // basic info
+    // ================= BASIC INFO =================
     age: {
       type: Number,
       required: true,
@@ -46,16 +46,16 @@ const kitchenRequestSchema = new mongoose.Schema(
       required: true,
     },
 
-    // ✅ 5 important health questions
+    // ================= HEALTH DETAILS =================
     goal: {
       type: String,
       required: true,
-    }, // weight loss / diabetic control / muscle gain etc.
+    },
 
     medicalConditions: {
       type: [String],
       default: [],
-    }, // diabetes, PCOS, BP...
+    },
 
     currentMedications: {
       type: String,
@@ -65,14 +65,14 @@ const kitchenRequestSchema = new mongoose.Schema(
     dietaryRestrictions: {
       type: [String],
       default: [],
-    }, // low sugar, low salt, gluten-free...
+    },
 
     digestiveIssues: {
       type: String,
       default: "",
-    }, // bloating, acidity, constipation...
+    },
 
-    // allergy section
+    // ================= ALLERGY =================
     hasAllergies: {
       type: Boolean,
       default: false,
@@ -93,7 +93,7 @@ const kitchenRequestSchema = new mongoose.Schema(
       default: "",
     },
 
-    // package / service requirement
+    // ================= PACKAGE =================
     foodPreference: {
       type: String,
       enum: ["veg", "non-veg", "vegan", "other"],
@@ -139,10 +139,19 @@ const kitchenRequestSchema = new mongoose.Schema(
       default: "",
     },
 
-    // request status
+    // ================= ORDER STATUS =================
     status: {
       type: String,
-      enum: ["pending", "reviewing", "approved", "rejected", "active", "completed"],
+      enum: [
+        "pending",
+        "reviewing",
+        "approved",
+        "rejected",
+        "preparing",
+        "out_for_delivery",
+        "delivered",
+        "cancelled",
+      ],
       default: "pending",
     },
 
@@ -150,9 +159,62 @@ const kitchenRequestSchema = new mongoose.Schema(
       type: String,
       default: "",
     },
+
+    price: {
+      type: Number,
+      default: 0,
+    },
+
+    estimatedDeliveryTime: {
+      type: String,
+      default: "",
+    },
+
+    deliveryPersonName: {
+      type: String,
+      default: "",
+    },
+
+    deliveryPersonPhone: {
+      type: String,
+      default: "",
+    },
+
+    deliveredAt: {
+      type: Date,
+      default: null,
+    },
+
+    // ================= 💰 PAYMENT =================
+    paymentStatus: {
+      type: String,
+      enum: ["pending", "paid", "failed", "refunded"],
+      default: "pending",
+    },
+
+    paymentMethod: {
+      type: String,
+      enum: ["cash_on_delivery", "card", "online"],
+      default: "cash_on_delivery",
+    },
+
+    paymentId: {
+      type: String,
+      default: "",
+    },
+
+    paidAt: {
+      type: Date,
+      default: null,
+    },
+
+
+    
   },
   { timestamps: true }
 );
+
+
 
 const KitchenRequest = mongoose.model("KitchenRequest", kitchenRequestSchema);
 

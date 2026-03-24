@@ -5,6 +5,7 @@ import {
   getAllKitchenRequests,
   getKitchenRequestById,
   updateKitchenRequestStatus,
+  cancelMyKitchenRequest,
 } from "../controllers/kitchenRequestController.js";
 
 import { protect } from "../middlewares/authMiddleware.js";
@@ -13,7 +14,7 @@ import upload from "../middlewares/uploadMiddleware.js";
 
 const router = express.Router();
 
-// ✅ User submit kitchen request with optional allergy report
+// ✅ User submit kitchen request
 router.post(
   "/requests",
   protect,
@@ -33,7 +34,7 @@ router.get(
   getAllKitchenRequests
 );
 
-// ✅ Kitchen/Admin/Dietician view single request
+// ✅ View single request
 router.get(
   "/requests/:id",
   protect,
@@ -41,7 +42,7 @@ router.get(
   getKitchenRequestById
 );
 
-// ✅ Kitchen/Admin update status
+// ✅ Kitchen/Admin update status and delivery details
 router.put(
   "/requests/:id/status",
   protect,
@@ -49,4 +50,21 @@ router.put(
   updateKitchenRequestStatus
 );
 
+// ✅ User cancel own request
+router.put(
+  "/requests/:id/cancel",
+  protect,
+  allowRoles("user"),
+  cancelMyKitchenRequest
+);
+
+
+import { makePayment } from "../controllers/kitchenRequestController.js";
+
+router.put(
+  "/requests/:id/pay",
+  protect,
+  allowRoles("user"),
+  makePayment
+);
 export default router;

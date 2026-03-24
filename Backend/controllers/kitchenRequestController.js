@@ -25,7 +25,7 @@ const parsePreferredMealTimes = (value) => {
   }
 };
 
-// ✅ User create kitchen request
+// ✅ CREATE REQUEST
 export const createKitchenRequest = async (req, res) => {
   try {
     const {
@@ -69,10 +69,6 @@ export const createKitchenRequest = async (req, res) => {
       return res.status(400).json({ message: "Required fields are missing" });
     }
 
-    const allergyReportUrl = req.file
-      ? `/${req.file.path.replace(/\\/g, "/")}`
-      : "";
-
     const request = await KitchenRequest.create({
       user: req.user._id,
       age,
@@ -88,7 +84,6 @@ export const createKitchenRequest = async (req, res) => {
       hasAllergies: hasAllergies === "true" || hasAllergies === true,
       allergyFoods: parseArrayField(allergyFoods),
       allergyNotes,
-      allergyReportUrl,
       foodPreference,
       mealsPerDay,
       numberOfDays,
@@ -101,7 +96,7 @@ export const createKitchenRequest = async (req, res) => {
 
     return res.status(201).json({
       success: true,
-      message: "Dietary kitchen request submitted successfully",
+      message: "Request created",
       request,
     });
   } catch (error) {
@@ -109,12 +104,12 @@ export const createKitchenRequest = async (req, res) => {
   }
 };
 
-// ✅ User get own requests
+// ✅ GET MY REQUESTS
 export const getMyKitchenRequests = async (req, res) => {
   try {
-    const requests = await KitchenRequest.find({ user: req.user._id })
-      .populate("user", "username email role")
-      .sort({ createdAt: -1 });
+    const requests = await KitchenRequest.find({ user: req.user._id }).sort({
+      createdAt: -1,
+    });
 
     return res.status(200).json(requests);
   } catch (error) {
@@ -122,12 +117,10 @@ export const getMyKitchenRequests = async (req, res) => {
   }
 };
 
-// ✅ Kitchen/Admin/Dietician get all requests
+// ✅ GET ALL
 export const getAllKitchenRequests = async (req, res) => {
   try {
-    const requests = await KitchenRequest.find()
-      .populate("user", "username email role")
-      .sort({ createdAt: -1 });
+    const requests = await KitchenRequest.find().sort({ createdAt: -1 });
 
     return res.status(200).json(requests);
   } catch (error) {
@@ -135,16 +128,20 @@ export const getAllKitchenRequests = async (req, res) => {
   }
 };
 
-// ✅ Get single request
+// ✅ GET SINGLE
 export const getKitchenRequestById = async (req, res) => {
   try {
-    const request = await KitchenRequest.findById(req.params.id).populate(
-      "user",
-      "username email role"
-    );
+    const request = await KitchenRequest.findById(req.params.id);
 
     if (!request) {
-      return res.status(404).json({ message: "Kitchen request not found" });
+      return res.status(404).json({ message: "Not found" });
+    }
+
+    if (
+      req.user.role === "user" &&
+      request.user.toString() !== req.user._id.toString()
+    ) {
+      return res.status(403).json({ message: "Access denied" });
     }
 
     return res.status(200).json(request);
@@ -153,30 +150,112 @@ export const getKitchenRequestById = async (req, res) => {
   }
 };
 
-// ✅ Kitchen/Admin update request status
+// ✅ UPDATE STATUS (🔥 PAYMENT CHECK ADDED)
 export const updateKitchenRequestStatus = async (req, res) => {
   try {
-    const { status, kitchenNotes } = req.body;
+    const {
+      status,
+      kitchenNotes,
+      price,
+      deliveryPersonName,
+      deliveryPersonPhone,
+    } = req.body;
 
     const request = await KitchenRequest.findById(req.params.id);
 
     if (!request) {
-      return res.status(404).json({ message: "Kitchen request not found" });
+      return res.status(404).json({ message: "Not found" });
     }
 
-    if (status) {
-      request.status = status;
+    // 🔥 PAYMENT CHECK
+    if (
+      ["preparing", "out_for_delivery", "delivered"].includes(status) &&
+      request.paymentStatus !== "paid"
+    ) {
+      return res.status(400).json({
+        message: "Payment not completed",
+      });
     }
 
-    if (kitchenNotes !== undefined) {
-      request.kitchenNotes = kitchenNotes;
+    if (status) request.status = status;
+    if (kitchenNotes !== undefined) request.kitchenNotes = kitchenNotes;
+    if (price !== undefined) request.price = price;
+    if (deliveryPersonName) request.deliveryPersonName = deliveryPersonName;
+    if (deliveryPersonPhone) request.deliveryPersonPhone = deliveryPersonPhone;
+
+    if (status === "delivered") {
+      request.deliveredAt = new Date();
     }
 
     await request.save();
 
     return res.status(200).json({
       success: true,
-      message: "Kitchen request updated successfully",
+      message: "Updated successfully",
+      request,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+// ✅ CANCEL
+export const cancelMyKitchenRequest = async (req, res) => {
+  try {
+    const request = await KitchenRequest.findById(req.params.id);
+
+    if (!request) {
+      return res.status(404).json({ message: "Not found" });
+    }
+
+    if (request.user.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    request.status = "cancelled";
+
+    await request.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Cancelled",
+      request,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+// ✅ PAYMENT (🔥 FIXED)
+export const makePayment = async (req, res) => {
+  try {
+    const { paymentMethod } = req.body;
+
+    const request = await KitchenRequest.findById(req.params.id);
+
+    if (!request) {
+      return res.status(404).json({ message: "Not found" });
+    }
+
+    if (request.user.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Access denied" });
+    }
+
+    if (request.paymentStatus === "paid") {
+      return res.status(400).json({ message: "Already paid" });
+    }
+
+    // ✅ PAYMENT SUCCESS
+    request.paymentStatus = "paid";
+    request.paymentMethod = paymentMethod || "cash_on_delivery";
+    request.paymentId = "PAY_" + Date.now();
+    request.paidAt = new Date(); // 🔥 IMPORTANT FIX
+
+    await request.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Payment successful",
       request,
     });
   } catch (error) {
