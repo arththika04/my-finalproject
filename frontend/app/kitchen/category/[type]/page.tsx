@@ -10,7 +10,16 @@ export default function CategoryPage() {
   const foodData: any = {
     oats: [
       { name: "Oats Pittu", price: 500, img: "/oats-pittu.jpg" },
-      { name: "Oats Smoothie", price: 350, img: "/oats2.jpg" },
+      { name: "Oats Smoothie", price: 350, img: "/oatssmoothie.jpg" },
+      { name: "Oats Salad", price: 400, img: "/oatssalad.jpg" },
+      { name: "Oats Porridge", price: 450, img: "/oatspridge.jpg" },
+      { name: "Oats Idli", price: 300, img: "/oatsidli.jpg" },
+      { name: "Oats Dosa", price: 350, img: "/oatsdosa.jpg" },
+      { name: "Oats Upma", price: 400, img: "/oatsupma.jpg" },
+      { name: "Oats Pancakes", price: 450, img: "/oatspancakes.jpg" },
+      { name: "Oats Energy Balls", price: 300, img: "/oatsenergyballs.jpg" },
+      { name: "Oats Muffins", price: 400, img: "/oatsmuffins.jpg" },
+    
     ],
 
     kurakkan: [
@@ -44,21 +53,21 @@ export default function CategoryPage() {
 
   const foods = foodData[type] || [];
 
-  return (
-    <div className="food-page">
+ return (
+  <div className="category-page">
 
-      <h1>{type.toUpperCase()} Foods</h1>
+    <h1>{type.toUpperCase()} Foods</h1>
 
-      <div className="grid">
-        {foods.map((item: any, i: number) => (
-          <div className="card" key={i}>
-            <img src={item.img} />
-            <h2>{item.name}</h2>
-            <p>Rs. {item.price}</p>
-          </div>
-        ))}
-      </div>
-
+    <div className="food-grid">
+      {foods.map((item: any, i: number) => (
+        <div className="food-card" key={i}>
+          <img src={item.img} />
+          <h3>{item.name}</h3>
+          <p>Rs. {item.price}</p>
+        </div>
+      ))}
     </div>
-  );
+
+  </div>
+);
 }
