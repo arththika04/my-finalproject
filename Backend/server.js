@@ -20,10 +20,6 @@ import newsletterRoutes from "./routes/newsletterRoutes.js";
 import appointmentRoutes from "./routes/appointmentRoutes.js";
 import foodRoutes from "./routes/foodRoutes.js";
 
-
-
-
-
 const app = express();
 
 // connect database
@@ -64,9 +60,9 @@ app.use("/api/kitchen", kitchenRequestRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api/newsletter", newsletterRoutes);
 app.use("/api/appointments", appointmentRoutes);
-app.use("/api/foods", foodRoutes);
 
 
+app.use("/api", foodRoutes);
 
 // server
 const PORT = process.env.PORT || 5000;

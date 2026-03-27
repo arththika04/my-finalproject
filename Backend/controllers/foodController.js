@@ -26,12 +26,17 @@ export const getFoods = async (req, res) => {
   }
 };
 
-// ✅ DELETE FOOD
+// ❌ DELETE FOOD
 export const deleteFood = async (req, res) => {
   try {
-    await Food.findByIdAndDelete(req.params.id);
-    res.json({ message: "Deleted" });
+    const food = await Food.findByIdAndDelete(req.params.id);
+
+    if (!food) {
+      return res.status(404).json({ message: "Food not found" });
+    }
+
+    res.json({ message: "Food deleted" });
   } catch (err) {
-    res.status(500).json({ error: err.message });
+    res.status(500).json({ message: err.message });
   }
 };
