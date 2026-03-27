@@ -8,6 +8,7 @@ const userSchema = new mongoose.Schema(
       minlength: 3,
       maxlength: 20,
       unique: true,
+      trim: true,
     },
 
     email: {
@@ -28,7 +29,7 @@ const userSchema = new mongoose.Schema(
 
     role: {
       type: String,
-      enum: ["user", "dietician", "kitchen", "admin"],
+      enum: ["user", "dietician", "kitchen", "admin"], // ✅ FIXED
       default: "user",
     },
 
@@ -42,7 +43,7 @@ const userSchema = new mongoose.Schema(
       default: true,
     },
 
-    // ✅ OLD reset token fields (optional )
+    // 🔐 Password reset (token based)
     resetPasswordToken: {
       type: String,
     },
@@ -50,7 +51,7 @@ const userSchema = new mongoose.Schema(
       type: Date,
     },
 
-    // ✅ NEW: OTP-based password reset fields (ADD THESE)
+    // 🔐 OTP-based reset
     resetOtpHash: {
       type: String,
     },

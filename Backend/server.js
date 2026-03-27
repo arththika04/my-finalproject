@@ -17,7 +17,8 @@ import adminRoutes from "./routes/adminRoutes.js";
 import kitchenRequestRoutes from "./routes/kitchenRequestRoutes.js";
 import contactRoutes from "./routes/contactRoutes.js";
 import newsletterRoutes from "./routes/newsletterRoutes.js";
-
+import appointmentRoutes from "./routes/appointmentRoutes.js";
+import foodRoutes from "./routes/foodRoutes.js";
 
 
 
@@ -62,6 +63,9 @@ app.use("/api/admin", adminRoutes);
 app.use("/api/kitchen", kitchenRequestRoutes);
 app.use("/api/contact", contactRoutes);
 app.use("/api/newsletter", newsletterRoutes);
+app.use("/api/appointments", appointmentRoutes);
+app.use("/api/foods", foodRoutes);
+
 
 
 // server
