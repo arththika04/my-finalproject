@@ -14,25 +14,47 @@ export default function AboutPage() {
         {/* LEFT */}
         <div className="about-left">
           <h1>
-            AESTHETICS 
-            COMPLEMENT <br />
-            COMFORT
+            AESTHETICS <br />
+            COMPLEMENT
           </h1>
 
-          <p>
-            Dietara redefines healthy living through intelligent nutrition. 
-            By combining AI-powered diet planning, expert dietician guidance
-            and a dedicated dietary kitchen, we create a seamless and premium 
-            experience tailored to every individual.
+          <h2>COMFORT</h2>
 
-            <br /><br />
+          {/* CARDS ADD HERE */}
+          <div className="about-cards">
 
-            We don’t just suggest diets — we make them practical, sustainable, 
-            and easy to follow in everyday life.
-          </p>
+            <div className="card">
+              <h3>AI Diet Planning</h3>
+              <p>
+                Personalized meal plans using AI based on your health goals.
+              </p>
+            </div>
+
+            <div className="card">
+              <h3>Expert Dieticians</h3>
+              <p>
+                Get guidance from certified nutrition experts anytime.
+              </p>
+            </div>
+
+            <div className="card">
+              <h3>Healthy Kitchen</h3>
+              <p>
+                Fresh meals prepared according to your diet plan.
+              </p>
+            </div>
+
+            <div className="card">
+              <h3>Smart Tracking</h3>
+              <p>
+                Track calories, meals, and progress easily.
+              </p>
+            </div>
+
+          </div>
         </div>
 
-        {/* RIGHT IMAGES */}
+        {/* RIGHT IMAGES (UNCHANGED) */}
         <div className="about-images">
 
           <div className="img img1">
@@ -53,3 +75,4 @@ export default function AboutPage() {
     </>
   );
 }
+

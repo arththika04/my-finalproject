@@ -1,7 +1,7 @@
 "use client";
 
-import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
+
 import ServicesInteractive from "@/components/ServicesInteractive";
 import BMICalculator from "@/components/BMICalculator";
 import AuthModal from "@/components/AuthModal";
@@ -10,25 +10,34 @@ import { useAuth } from "@/context/AuthContext";
 export default function HomePage() {
   const { isLoginOpen, openLogin, closeLogin } = useAuth();
 
-  useEffect(() => {
-    const existingScript = document.querySelector(
-      'script[src="https://www.instagram.com/embed.js"]'
-    );
+  const [split, setSplit] = useState(false);
+  const [hideIntro, setHideIntro] = useState(false);
 
-    if (!existingScript) {
-      const script = document.createElement("script");
-      script.src = "https://www.instagram.com/embed.js";
-      script.async = true;
-      document.body.appendChild(script);
-    }
+  // 🔥 SPLIT ANIMATION
+  useEffect(() => {
+    const t1 = setTimeout(() => setSplit(true), 1500);
+    const t2 = setTimeout(() => setHideIntro(true), 3200);
+
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+    };
   }, []);
 
   return (
     <>
       <AuthModal isOpen={isLoginOpen} onClose={closeLogin} />
 
+      {/* 🔥 INTRO SPLIT OVERLAY */}
+      {!hideIntro && (
+        <div className={`intro-wrapper ${split ? "split" : ""}`}>
+          <div className="intro-left"></div>
+          <div className="intro-right"></div>
+        </div>
+      )}
+
+      {/* 🔥 MAIN PAGE (ALREADY LOADED) */}
       <main className="fitness-home">
-        {/* HERO SECTION */}
         <section className="hero-section">
           <div className="hero-overlay">
             <div className="hero-content">
@@ -41,15 +50,9 @@ export default function HomePage() {
                   for you.
                 </p>
 
-                <div className="hero-buttons">
-                  <button
-                    type="button"
-                    className="primary-btn"
-                    onClick={openLogin}
-                  >
-                    Get Started
-                  </button>
-                </div>
+                <button className="primary-btn" onClick={openLogin}>
+                  Get Started
+                </button>
 
                 <div className="hero-stats">
                   <div className="stat-box">
@@ -72,85 +75,8 @@ export default function HomePage() {
           </div>
         </section>
 
-
-         {/* SERVICES SECTION */}
         <ServicesInteractive />
-
-
-         {/* BMI CALCULATOR */}
         <BMICalculator />
-
-        {/* why choose us */}
-
-        <section className="why-section-premium">
-  <div className="why-title">
-    <h2>Why Choose Us</h2>
-    <p>
-      Dietara helps you build healthier eating habits with expert guidance,
-      smart tracking, and quality meal support.
-    </p>
-  </div>
-
-  <div className="why-container">
-    
-    {/* LEFT */}
-    <div className="why-left">
-      <div className="why-card-premium">
-        <div className="why-icon">🥗</div>
-        <h3>Customized Plans</h3>
-        <p>Customized meal plans based on your health goals.</p>
-      </div>
-
-      <div className="why-card-premium">
-        <div className="why-icon">👩‍⚕️</div>
-        <h3>Expert Dieticians</h3>
-        <p>Get trusted advice from certified nutrition professionals.</p>
-      </div>
-    </div>
-
-    {/* CENTER */}
-    <div className="why-center">
-      <div className="why-logo-premium">
-        <img src="/logo.png" alt="Dietara Logo" />
-      </div>
-    </div>
-
-    {/* RIGHT */}
-    <div className="why-right">
-      <div className="why-card-premium">
-        <div className="why-icon">📊</div>
-        <h3>Smart Tracking</h3>
-        <p>Track your meals and progress easily.</p>
-      </div>
-
-      <div className="why-card-premium">
-        <div className="why-icon">🍲</div>
-        <h3>Healthy Kitchen</h3>
-        <p>Enjoy balanced meals prepared with care.</p>
-      </div>
-    </div>
-
-  </div>
-</section>
-
-
-<section className="allergy-section">
-  <div className="allergy-box">
-    <h3>⚠️ Allergy & Health Notice</h3>
-
-    <p>
-      If you are aware of any food allergies, please inform us clearly before using our services.
-    </p>
-
-    <p>
-      If you are unsure, we recommend submitting an allergy report or consulting a medical professional.
-    </p>
-
-    <p>
-      SmartDiet Hub is not responsible for any allergic reactions caused due to missing or incorrect information.
-    </p>
-  </div>
-</section>
       </main>
     </>
   );
