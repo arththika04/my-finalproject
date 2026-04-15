@@ -1,4 +1,5 @@
 import Booking from "../models/Booking.js";
+import Notification from "../models/Notification.js";
 import { generateFromEnv } from "../utils/jitsiJwt.js";
 import sendEmail from "../utils/sendEmail.js";
 import { buildBookingTimingResponse, getBookingWindowState } from "../utils/bookingSchedule.js";
@@ -91,6 +92,44 @@ const sendCustomerApprovalAlert = async (bookingDoc) => {
     });
   } catch (error) {
     console.error("Customer approval email failed:", error?.message || error);
+  }
+};
+
+const sendCustomerCancellationAlert = async (bookingDoc) => {
+  try {
+    const booking = await Booking.findById(bookingDoc._id)
+      .populate("user", "username email")
+      .populate("dietician", "username email");
+
+    const customerEmail = booking?.user?.email;
+    if (!customerEmail) return;
+
+    const modeLabel = normalizeConsultationMode(booking?.mode);
+    const readableMode = modeLabel === "consultation" ? "consultation" : `${modeLabel} consultation`;
+
+    const html = `
+      <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #111827;">
+        <h2 style="margin: 0 0 12px; color: #8b0c2e;">Your Booking Was Cancelled</h2>
+        <p>Hello ${booking?.user?.username || "Customer"},</p>
+        <p>Your dietician has cancelled your ${readableMode} booking.</p>
+        <ul style="padding-left: 18px;">
+          <li><strong>Dietician:</strong> ${booking?.dietician?.username || "-"} (${booking?.dietician?.email || "-"})</li>
+          <li><strong>Date:</strong> ${booking?.date || "-"}</li>
+          <li><strong>Time:</strong> ${booking?.time || "-"}</li>
+          <li><strong>Mode:</strong> ${booking?.mode || "-"}</li>
+          <li><strong>Booking ID:</strong> ${booking?._id || "-"}</li>
+        </ul>
+        <p>Please check your dashboard for updates and rebook if needed.</p>
+      </div>
+    `;
+
+    await sendEmail({
+      to: customerEmail,
+      subject: "Your consultation booking was cancelled",
+      html,
+    });
+  } catch (error) {
+    console.error("Customer cancellation email failed:", error?.message || error);
   }
 };
 
@@ -214,7 +253,7 @@ export const markBookingPaid = async (req, res) => {
 
     booking.paymentStatus = "paid";
     booking.status = "confirmed";
-    booking.dieticianAlertSeen = false; // trigger alert on dietician dashboard
+    booking.dieticianAlertSeen = false;
     booking.reminder30MinSentToUser = false;
     booking.reminder30MinSentToDietician = false;
     booking.reminder30MinSentAt = null;
@@ -284,7 +323,7 @@ export const markDieticianAlertSeen = async (req, res) => {
   }
 };
 
-// DIETICIAN - APPROVE BOOKING (unlocks Call/Chat for both sides)
+// DIETICIAN - APPROVE BOOKING
 export const approveBooking = async (req, res) => {
   try {
     const booking = await Booking.findById(req.params.bookingId)
@@ -336,7 +375,55 @@ export const approveBooking = async (req, res) => {
   }
 };
 
-// USER/DIETICIAN - GET COMMUNICATION SESSION (Jitsi room details)
+// DIETICIAN - CANCEL BOOKING
+export const cancelBookingByDietician = async (req, res) => {
+  try {
+    const booking = await Booking.findById(req.params.bookingId)
+      .populate("user", "username email")
+      .populate("dietician", "username email");
+
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+
+    const bookingDieticianId = booking?.dietician?._id?.toString?.() || booking?.dietician?.toString?.();
+
+    if (!bookingDieticianId || bookingDieticianId !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Not allowed" });
+    }
+
+    if (String(booking.status || "").toLowerCase() === "cancelled") {
+      return res.status(400).json({ message: "Booking already cancelled" });
+    }
+
+    booking.status = "cancelled";
+    booking.dieticianApproved = false;
+    booking.sessionCompletedAt = null;
+    await booking.save();
+
+    await Notification.create({
+      user: booking.user._id,
+      title: "Consultation Cancelled",
+      message: "Your consultation was cancelled by the dietician.",
+      type: "cancel",
+      relatedBooking: booking._id,
+      isRead: false,
+    });
+
+    await sendCustomerCancellationAlert(booking);
+
+    return res.status(200).json({
+      success: true,
+      message: "Booking cancelled successfully and user notified",
+      booking,
+    });
+  } catch (err) {
+    console.error("Cancel Booking Error:", err);
+    return res.status(500).json({ message: err.message });
+  }
+};
+
+// USER/DIETICIAN - GET COMMUNICATION SESSION
 export const getBookingCommunicationSession = async (req, res) => {
   try {
     const booking = await Booking.findById(req.params.bookingId)
@@ -446,10 +533,7 @@ export const updateBookingByAdmin = async (req, res) => {
       return res.status(400).json({ message: "Invalid payment status" });
     }
 
-    if (
-      dieticianApproved !== undefined &&
-      typeof dieticianApproved !== "boolean"
-    ) {
+    if (dieticianApproved !== undefined && typeof dieticianApproved !== "boolean") {
       return res.status(400).json({ message: "Invalid approval value" });
     }
 

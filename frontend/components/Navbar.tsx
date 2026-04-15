@@ -4,9 +4,10 @@ import Image from "next/image";
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { useAuth } from "@/context/AuthContext";
-import { usePathname } from "next/navigation"; // ✅ ADD
+import { usePathname } from "next/navigation";
 import { resolveBackendAssetUrl } from "@/lib/assetUrl";
 import { FiBell } from "react-icons/fi";
+import { toast } from "react-toastify";
 import api from "@/lib/axios";
 
 type BookingActivity = {
@@ -41,13 +42,14 @@ const services = [
 ];
 
 export default function Navbar() {
-  const pathname = usePathname(); // ✅ GET CURRENT PATH
+  const pathname = usePathname();
   const isDashboardRoute = pathname.startsWith("/dashboard");
   const isPaymentSuccessRoute = pathname === "/payment/success";
   const [showServices, setShowServices] = useState(false);
   const servicesCloseTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [notificationsLoading, setNotificationsLoading] = useState(false);
   const [userActions, setUserActions] = useState<UserAction[]>([]);
+  const shownCancelToastsRef = useRef<Set<string>>(new Set());
   const { user, openLogin } = useAuth();
 
   const avatarSrc = resolveBackendAssetUrl(user?.avatar) || "/aval.jpg";
@@ -109,6 +111,7 @@ export default function Navbar() {
   useEffect(() => {
     if (!user || user.role !== "user") {
       setUserActions([]);
+      shownCancelToastsRef.current.clear();
       return;
     }
 
@@ -127,12 +130,14 @@ export default function Navbar() {
           bookingsResult.status === "fulfilled" ? bookingsResult.value.data || [] : [];
 
         const orderActions: UserAction[] = orders.map((order) => {
-          const status = String(order.status || "pending");
+          const status = String(order.status || "pending").toLowerCase();
           let message = "Order successfully placed";
 
-          if (status === "delivered") message = "Order delivered successfully";
-          else if (status === "cancelled") message = "Order was cancelled";
-          else if (status !== "pending" && status !== "paid") {
+          if (status === "delivered") {
+            message = "Order delivered successfully";
+          } else if (status === "cancelled") {
+            message = "Order was cancelled";
+          } else if (status !== "pending" && status !== "paid") {
             message = `Order is now ${status.replaceAll("_", " ")}`;
           }
 
@@ -147,11 +152,24 @@ export default function Navbar() {
         });
 
         const bookingActions: UserAction[] = bookings.map((booking) => {
+          const status = String(booking.status || "").toLowerCase();
+          const paymentStatus = String(booking.paymentStatus || "").toLowerCase();
+
           let message = "Consultation booking submitted";
 
-          if (booking.dieticianApproved) {
+          if (status === "cancelled") {
+            message = "Your consultation was cancelled by the dietician";
+
+            if (!shownCancelToastsRef.current.has(booking._id)) {
+              shownCancelToastsRef.current.add(booking._id);
+
+              setTimeout(() => {
+                toast.error("Your consultation was cancelled by the dietician");
+              }, 300);
+            }
+          } else if (booking.dieticianApproved) {
             message = "Consultation approved by dietician";
-          } else if (String(booking.paymentStatus || "") === "paid") {
+          } else if (paymentStatus === "paid") {
             message = "Consultation payment successful";
           }
 
@@ -198,8 +216,6 @@ export default function Navbar() {
   return (
     <header className="site-header">
       <div className="navbar">
-
-        {/* LOGO */}
         <Link href="/" className="navbar-brand">
           <Image
             src="/logo.png"
@@ -211,12 +227,10 @@ export default function Navbar() {
           <span>Dietara</span>
         </Link>
 
-        {/* NAV LINKS */}
         <nav className="navbar-links">
           <Link href="/">Home</Link>
           <Link href="/community">Community</Link>
 
-          {/* SERVICES DROPDOWN */}
           <div
             className="nav-dropdown"
             onMouseEnter={openServicesMenu}
@@ -263,7 +277,6 @@ export default function Navbar() {
           <Link href="/contact">Contact</Link>
         </nav>
 
-        {/* ACTION BUTTON */}
         <div className="navbar-actions">
           {user ? (
             <>
@@ -335,7 +348,6 @@ export default function Navbar() {
             </button>
           )}
         </div>
-
       </div>
     </header>
   );
