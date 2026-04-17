@@ -1,5 +1,4 @@
 import Booking from "../models/Booking.js";
-import Notification from "../models/Notification.js";
 import { generateFromEnv } from "../utils/jitsiJwt.js";
 import sendEmail from "../utils/sendEmail.js";
 import { buildBookingTimingResponse, getBookingWindowState } from "../utils/bookingSchedule.js";
@@ -375,53 +374,6 @@ export const approveBooking = async (req, res) => {
   }
 };
 
-// DIETICIAN - CANCEL BOOKING
-export const cancelBookingByDietician = async (req, res) => {
-  try {
-    const booking = await Booking.findById(req.params.bookingId)
-      .populate("user", "username email")
-      .populate("dietician", "username email");
-
-    if (!booking) {
-      return res.status(404).json({ message: "Booking not found" });
-    }
-
-    const bookingDieticianId = booking?.dietician?._id?.toString?.() || booking?.dietician?.toString?.();
-
-    if (!bookingDieticianId || bookingDieticianId !== req.user._id.toString()) {
-      return res.status(403).json({ message: "Not allowed" });
-    }
-
-    if (String(booking.status || "").toLowerCase() === "cancelled") {
-      return res.status(400).json({ message: "Booking already cancelled" });
-    }
-
-    booking.status = "cancelled";
-    booking.dieticianApproved = false;
-    booking.sessionCompletedAt = null;
-    await booking.save();
-
-    await Notification.create({
-      user: booking.user._id,
-      title: "Consultation Cancelled",
-      message: "Your consultation was cancelled by the dietician.",
-      type: "cancel",
-      relatedBooking: booking._id,
-      isRead: false,
-    });
-
-    await sendCustomerCancellationAlert(booking);
-
-    return res.status(200).json({
-      success: true,
-      message: "Booking cancelled successfully and user notified",
-      booking,
-    });
-  } catch (err) {
-    console.error("Cancel Booking Error:", err);
-    return res.status(500).json({ message: err.message });
-  }
-};
 
 // USER/DIETICIAN - GET COMMUNICATION SESSION
 export const getBookingCommunicationSession = async (req, res) => {

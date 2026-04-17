@@ -6,7 +6,6 @@ import {
   getDieticianBookings,
   markDieticianAlertSeen,
   approveBooking,
-  cancelBookingByDietician,
   getBookingCommunicationSession,
   getAllBookingsForAdmin,
   updateBookingByAdmin,
@@ -42,8 +41,7 @@ router.put("/:bookingId/alert-seen", protect, allowRoles("dietician"), markDieti
 // DIETICIAN — approve booking (unlocks Call/Chat)
 router.put("/:bookingId/approve", protect, allowRoles("dietician"), approveBooking);
 
-// DIETICIAN — cancel booking + notify user
-router.put("/:bookingId/cancel", protect, allowRoles("dietician"), cancelBookingByDietician);
+
 
 // ADMIN — manage all bookings
 router.get("/admin/all", protect, allowRoles("admin"), getAllBookingsForAdmin);
