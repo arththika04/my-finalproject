@@ -7,6 +7,7 @@ export type User = {
   phone?: string;
   avatar?: string;
   role: Role;
+  needsRoleSelection?: boolean;
 };
 
 export type AuthResponse = {

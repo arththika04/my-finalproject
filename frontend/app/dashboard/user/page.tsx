@@ -24,6 +24,7 @@ import {
   FiArrowLeft,
   FiCreditCard,
   FiMessageCircle,
+  FiMail,
   FiMoon,
   FiPhone,
   FiPackage,
@@ -43,6 +44,8 @@ type Booking = {
   time: string;
   mode: string;
   status: string;
+  cancellationReason?: string;
+  cancelledAt?: string | null;
   paymentStatus: string;
   dieticianApproved: boolean;
   reviewSubmitted: boolean;
@@ -173,10 +176,12 @@ export default function UserDashboard() {
   const [clockTick, setClockTick] = useState(Date.now());
   const [showHelpPopup, setShowHelpPopup] = useState(false);
   const shownReminderToastsRef = useRef<Set<string>>(new Set());
+  const shownCancellationToastsRef = useRef<Set<string>>(new Set());
 
   const supportEmail = "support@dietara.com";
   const supportPhone = "+94 77 123 4567";
   const whatsappSupportLink = "https://wa.me/94771234567";
+  const supportWhatsappNumber = "94771234567";
 
   const resolveAvatar = (avatar?: string) => {
     return resolveBackendAssetUrl(avatar);
@@ -253,6 +258,21 @@ export default function UserDashboard() {
       }
     });
   }, [bookings, clockTick]);
+
+  useEffect(() => {
+    bookings.forEach((booking) => {
+      if (booking.status !== "cancelled") return;
+      const key = `${booking._id}-cancelled`;
+      if (shownCancellationToastsRef.current.has(key)) return;
+
+      shownCancellationToastsRef.current.add(key);
+      toast.error(
+        `Booking cancelled by ${booking.dietician?.username || "Dietician"}${
+          booking.cancellationReason ? `: ${booking.cancellationReason}` : ""
+        }`
+      );
+    });
+  }, [bookings]);
 
   useEffect(() => {
     if (!user) return;
@@ -500,6 +520,32 @@ export default function UserDashboard() {
       setOtpResetting(false);
     }
   };
+
+  const getRefundRequestMessage = (booking: Booking) => {
+    const reason = String(booking.cancellationReason || "").trim() || "No reason provided";
+    return [
+      "Hello Dietara support,",
+      "",
+      "I am requesting a refund for a cancelled consultation booking.",
+      `Booking ID: ${booking._id}`,
+      `Dietician: ${booking.dietician?.username || "-"}`,
+      `Date: ${booking.date}`,
+      `Time: ${booking.time}`,
+      `Cancellation reason: ${reason}`,
+      "",
+      `My account email: ${user?.email || "-"}`,
+      "",
+      "Please process my refund request. Thank you.",
+    ].join("\n");
+  };
+
+  const getRefundWhatsAppLink = (booking: Booking) =>
+    `https://wa.me/${supportWhatsappNumber}?text=${encodeURIComponent(getRefundRequestMessage(booking))}`;
+
+  const getRefundEmailLink = (booking: Booking) =>
+    `mailto:${supportEmail}?subject=${encodeURIComponent(
+      `Refund request for cancelled booking ${booking._id}`
+    )}&body=${encodeURIComponent(getRefundRequestMessage(booking))}`;
 
   const sendDeleteOtp = async () => {
     setDeleteOtpSending(true);
@@ -798,8 +844,28 @@ export default function UserDashboard() {
                     </div>
 
                     <div className="ud-booking-actions">
-                      {/* CALL / CHAT — only if dietician approved */}
-                      {b.dieticianApproved ? (
+                      {b.status === "cancelled" ? (
+                        <>
+                          <p className="ud-waiting ended">
+                            <FiAlertCircle className="ud-action-icon" />
+                            This booking was cancelled.
+                            {b.cancellationReason ? ` Reason: ${b.cancellationReason}` : ""}
+                          </p>
+                          <a
+                            className="ud-action-btn refund"
+                            href={getRefundWhatsAppLink(b)}
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            <FiMessageCircle className="ud-action-icon" />
+                            Request Refund (WhatsApp)
+                          </a>
+                          <a className="ud-action-btn refund" href={getRefundEmailLink(b)}>
+                            <FiMail className="ud-action-icon" />
+                            Request Refund (Email)
+                          </a>
+                        </>
+                      ) : b.dieticianApproved ? (
                         <>
                           {timeState.canJoin && isCallMode(b.mode) && (
                             <button

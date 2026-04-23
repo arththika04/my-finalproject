@@ -28,6 +28,7 @@ const toSafeUser = (user) => ({
   phone: user.phone || "",
   avatar: user.avatar || "",
   role: user.role,
+  needsRoleSelection: Boolean(user.needsRoleSelection),
 });
 
 const generateOtp = () => String(Math.floor(100000 + Math.random() * 900000));
@@ -208,6 +209,33 @@ export const updateMe = async (req, res) => {
     return res.status(200).json({
       success: true,
       message: "Profile updated successfully",
+      user: toSafeUser(user),
+    });
+  } catch (error) {
+    return res.status(500).json({ message: error.message });
+  }
+};
+
+export const completeRoleSelection = async (req, res) => {
+  try {
+    const requestedRole = normalizeRole(req.body?.role);
+
+    if (!ALLOWED_ROLES.includes(requestedRole) || requestedRole === "admin") {
+      return res.status(400).json({ message: "Please select a valid role" });
+    }
+
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    user.role = requestedRole;
+    user.needsRoleSelection = false;
+    await user.save();
+
+    return res.status(200).json({
+      success: true,
+      message: "Role selected successfully",
       user: toSafeUser(user),
     });
   } catch (error) {

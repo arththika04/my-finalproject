@@ -36,6 +36,8 @@ type Booking = {
   time: string;
   mode: string;
   status: string;
+  cancellationReason?: string;
+  cancelledAt?: string | null;
   paymentStatus: string;
   dieticianAlertSeen: boolean;
   dieticianApproved: boolean;
@@ -69,6 +71,9 @@ export default function DieticianDashboard() {
   const [bookings, setBookings] = useState<Booking[]>([]);
   const [profile, setProfile] = useState<Profile | null>(null);
   const [approvingId, setApprovingId] = useState<string | null>(null);
+  const [cancelBookingId, setCancelBookingId] = useState<string | null>(null);
+  const [cancelReason, setCancelReason] = useState("");
+  const [cancelling, setCancelling] = useState(false);
   const prevAlertCount = useRef(0);
   const accessIssueHandled = useRef(false);
 
@@ -270,6 +275,39 @@ export default function DieticianDashboard() {
       toast.error(err?.response?.data?.message || "Approval failed");
     } finally {
       setApprovingId(null);
+    }
+  };
+
+  const openCancelModal = (bookingId: string) => {
+    setCancelBookingId(bookingId);
+    setCancelReason("");
+  };
+
+  const closeCancelModal = () => {
+    if (cancelling) return;
+    setCancelBookingId(null);
+    setCancelReason("");
+  };
+
+  const handleCancelBooking = async () => {
+    if (!cancelBookingId) return;
+
+    const reason = cancelReason.trim();
+    if (reason.length < 5) {
+      toast.error("Please enter at least 5 characters for cancellation reason.");
+      return;
+    }
+
+    setCancelling(true);
+    try {
+      await api.put(`/bookings/${cancelBookingId}/cancel`, { reason });
+      toast.success("Booking cancelled and user notified.");
+      closeCancelModal();
+      fetchBookings();
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Failed to cancel booking");
+    } finally {
+      setCancelling(false);
     }
   };
 
@@ -832,8 +870,15 @@ export default function DieticianDashboard() {
                     </div>
 
                     <div className="dd-booking-actions">
+                      {b.status === "cancelled" && b.cancellationReason && (
+                        <p className="dd-timing-note ended">
+                          <FiXCircle className="dd-action-icon" />
+                          Cancel reason: {b.cancellationReason}
+                        </p>
+                      )}
+
                       {/* APPROVE BUTTON — only if paid and not yet approved */}
-                      {b.paymentStatus === "paid" && !b.dieticianApproved && (
+                      {b.paymentStatus === "paid" && !b.dieticianApproved && b.status !== "cancelled" && (
                         <button
                           className="dd-approve-btn"
                           onClick={() => handleApprove(b._id)}
@@ -848,8 +893,18 @@ export default function DieticianDashboard() {
                         </button>
                       )}
 
+                      {b.status !== "cancelled" && b.status !== "completed" && (
+                        <button
+                          className="dd-action-btn cancel"
+                          onClick={() => openCancelModal(b._id)}
+                        >
+                          <FiXCircle className="dd-action-icon" />
+                          Cancel Booking
+                        </button>
+                      )}
+
                       {/* CALL / CHAT — only if approved */}
-                      {b.dieticianApproved && (
+                      {b.dieticianApproved && b.status !== "cancelled" && (
                         <>
                           {timeState.canJoin && isCallMode(b.mode) && (
                             <button
@@ -1340,6 +1395,40 @@ export default function DieticianDashboard() {
             >
               Open WhatsApp Support
             </a>
+          </div>
+        </div>
+      )}
+
+      {cancelBookingId && (
+        <div className="dd-help-overlay" onClick={closeCancelModal}>
+          <div className="dd-help-modal" onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              className="dd-help-close"
+              onClick={closeCancelModal}
+              aria-label="Close cancel booking dialog"
+            >
+              <FiX />
+            </button>
+            <h3>Cancel Booking</h3>
+            <p className="dd-help-text">
+              Enter the reason. This will be visible to the user in dashboard and email.
+            </p>
+            <textarea
+              className="dd-settings-input"
+              rows={4}
+              value={cancelReason}
+              onChange={(e) => setCancelReason(e.target.value)}
+              placeholder="Type cancellation reason..."
+            />
+            <button
+              type="button"
+              className="dd-submit-btn"
+              onClick={handleCancelBooking}
+              disabled={cancelling}
+            >
+              {cancelling ? "Cancelling..." : "Confirm Cancel"}
+            </button>
           </div>
         </div>
       )}

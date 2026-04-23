@@ -43,6 +43,10 @@ const userSchema = new mongoose.Schema(
       enum: ["user", "dietician", "kitchen", "admin"], // ✅ FIXED
       default: "user",
     },
+    needsRoleSelection: {
+      type: Boolean,
+      default: false,
+    },
 
     isVerified: {
       type: Boolean,

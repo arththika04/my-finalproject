@@ -25,6 +25,15 @@ const bookingSchema = new mongoose.Schema(
       enum: ["pending", "confirmed", "completed", "cancelled"],
       default: "pending",
     },
+    cancellationReason: {
+      type: String,
+      default: "",
+      trim: true,
+    },
+    cancelledAt: {
+      type: Date,
+      default: null,
+    },
 
     paymentStatus: {
       type: String,

@@ -36,6 +36,7 @@ passport.use(
           username: profile.displayName,
           email,
           googleId: profile.id,
+          needsRoleSelection: true,
           isVerified: true,
         });
 
