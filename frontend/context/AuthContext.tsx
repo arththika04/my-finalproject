@@ -48,6 +48,11 @@ const getPostAuthRedirectPath = (role: User["role"]) => {
   return "/";
 };
 
+const getPostLoginPath = (nextUser: User) => {
+  if (nextUser.needsRoleSelection) return "/select-role";
+  return getPostAuthRedirectPath(normalizeRole(nextUser.role));
+};
+
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoginOpen, setIsLoginOpen] = useState(false);
@@ -115,9 +120,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     closeLogin();
 
-    const role = normalizeRole(loggedInUser.role);
-
-    window.location.href = getPostAuthRedirectPath(role);
+    window.location.href = getPostLoginPath(loggedInUser);
 
     return loggedInUser;
   };
@@ -133,9 +136,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     closeLogin();
 
-    const role = normalizeRole(registeredUser.role);
-
-    window.location.href = getPostAuthRedirectPath(role);
+    window.location.href = getPostLoginPath(registeredUser);
 
     return registeredUser;
   };

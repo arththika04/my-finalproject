@@ -106,6 +106,8 @@ const sendCustomerCancellationAlert = async (bookingDoc) => {
     const modeLabel = normalizeConsultationMode(booking?.mode);
     const readableMode = modeLabel === "consultation" ? "consultation" : `${modeLabel} consultation`;
 
+    const cancellationReason = String(booking?.cancellationReason || "").trim();
+
     const html = `
       <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #111827;">
         <h2 style="margin: 0 0 12px; color: #8b0c2e;">Your Booking Was Cancelled</h2>
@@ -118,6 +120,11 @@ const sendCustomerCancellationAlert = async (bookingDoc) => {
           <li><strong>Mode:</strong> ${booking?.mode || "-"}</li>
           <li><strong>Booking ID:</strong> ${booking?._id || "-"}</li>
         </ul>
+        ${
+          cancellationReason
+            ? `<p><strong>Reason:</strong> ${cancellationReason}</p>`
+            : ""
+        }
         <p>Please check your dashboard for updates and rebook if needed.</p>
       </div>
     `;
@@ -371,6 +378,53 @@ export const approveBooking = async (req, res) => {
   } catch (err) {
     console.error("Approve Booking Error:", err);
     res.status(500).json({ message: err.message });
+  }
+};
+
+export const cancelBookingByDietician = async (req, res) => {
+  try {
+    const reason = String(req.body?.reason || "").trim();
+    if (reason.length < 5) {
+      return res.status(400).json({ message: "Cancellation reason must be at least 5 characters" });
+    }
+
+    const booking = await Booking.findById(req.params.bookingId)
+      .populate("user", "username email")
+      .populate("dietician", "username email");
+
+    if (!booking) {
+      return res.status(404).json({ message: "Booking not found" });
+    }
+
+    const bookingDieticianId = booking?.dietician?._id?.toString?.() || booking?.dietician?.toString?.();
+    if (!bookingDieticianId || bookingDieticianId !== req.user._id.toString()) {
+      return res.status(403).json({ message: "Not allowed" });
+    }
+
+    if (booking.status === "completed") {
+      return res.status(400).json({ message: "Completed booking cannot be cancelled" });
+    }
+
+    if (booking.status === "cancelled") {
+      return res.status(400).json({ message: "Booking already cancelled" });
+    }
+
+    booking.status = "cancelled";
+    booking.dieticianApproved = false;
+    booking.cancellationReason = reason;
+    booking.cancelledAt = new Date();
+    booking.sessionCompletedAt = null;
+    await booking.save();
+
+    await sendCustomerCancellationAlert(booking);
+
+    return res.status(200).json({
+      success: true,
+      message: "Booking cancelled and user notified",
+      booking,
+    });
+  } catch (err) {
+    return res.status(500).json({ message: err.message });
   }
 };
 

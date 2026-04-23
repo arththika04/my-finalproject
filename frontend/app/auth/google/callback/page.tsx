@@ -42,6 +42,10 @@ export default function GoogleAuthCallbackPage() {
 
         setAuthUser(user);
         toast.success("Google sign-in successful ✅");
+        if (user.needsRoleSelection) {
+          router.replace("/select-role");
+          return;
+        }
         router.replace(getPostAuthRedirectPath(user.role));
       } catch {
         localStorage.removeItem("token");
